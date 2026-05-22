@@ -1,0 +1,888 @@
+openapi: 3.0.0
+info:
+  title: Nacimiento API
+  version: 0.1.0
+  description: |
+    Nacimiento API with SQLite persistence and JWT-based authentication.
+    Public endpoints are limited to register and login.
+    User, egg, post, quest, shop, and inventory endpoints require a Bearer token
+    obtained from POST /api/auth/login.
+
+servers:
+  - url: http://localhost:5000
+
+tags:
+  - name: System Check
+    description: Optional backend health check endpoint.
+  - name: Authentication
+    description: Register, login, and current user profile APIs.
+  - name: Egg
+    description: Egg state and equipped item APIs.
+  - name: Post / Notebook
+    description: User memory post APIs.
+  - name: Quest
+    description: Daily quest and reward claim APIs.
+  - name: Shop / Inventory
+    description: Shop browsing, purchase, and owned item APIs.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # 0. COMMON / SYSTEM SCHEMAS
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Something went wrong"
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Success"
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "ok"
+        message:
+          type: string
+          example: "Memory Egg backend is running"
+
+    # 1. ENTITY SCHEMAS
+    # These schemas follow the 7 DB entities in the data model.
+    # Note: password_hash exists in the DB, but it is intentionally
+    # not exposed through API response schemas.
+    
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          example: "junu@example.com"
+        nickname:
+          type: string
+          example: "XxHEROxX"
+        will_balance:
+          type: integer
+          example: 120
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-05-22T12:00:00Z"
+
+    Egg:
+      type: object
+      properties:
+        egg_id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        stage:
+          type: integer
+          example: 2
+        glow:
+          type: integer
+          example: 30
+        warmth:
+          type: integer
+          example: 25
+        weight:
+          type: integer
+          example: 10
+        active_background_id:
+          type: integer
+          nullable: true
+          example: 3
+        active_music_id:
+          type: integer
+          nullable: true
+          example: null
+        active_decoration_id:
+          type: integer
+          nullable: true
+          example: 7
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-05-22T12:10:00Z"
+
+    Post:
+      type: object
+      properties:
+        post_id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Today I wrote one small memory"
+        content:
+          type: string
+          example: "The openapi receipt is so long. I think it is longer than server.js code"
+        image_url:
+          type: string
+          nullable: true
+          example: "https://example.com/memory.png"
+        tag:
+          type: string
+          enum: [general, food, study]
+          example: "study"
+        visibility:
+          type: string
+          enum: [private, public, anonymous]
+          example: "private"
+        word_count:
+          type: integer
+          example: 10
+        will_reward:
+          type: integer
+          example: 5
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-05-22T12:20:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-05-22T12:20:00Z"
+
+    Quest:
+      type: object
+      properties:
+        quest_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Write a study memory"
+        description:
+          type: string
+          example: "Write a post with the study tag."
+        quest_type:
+          type: string
+          enum: [post_tag, image, word_count]
+          example: "post_tag"
+        required_tag:
+          type: string
+          enum: [general, food, study]
+          nullable: true
+          example: "study"
+        required_word_count:
+          type: integer
+          example: 30
+        required_image:
+          type: boolean
+          example: false
+        reward_will:
+          type: integer
+          example: 10
+        is_active:
+          type: boolean
+          example: true
+
+    UserQuest:
+      type: object
+      properties:
+        user_quest_id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        quest_id:
+          type: integer
+          example: 1
+        assigned_date:
+          type: string
+          format: date
+          example: "2026-05-22"
+        status:
+          type: string
+          enum: [active, completed, claimed] # active : the quest is assigned. completed: the quest has been successfully completed. claimed : the reward has been distributed
+          example: "active"
+        completed_post_id:
+          type: integer
+          nullable: true
+          example: null
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+    ShopItem:
+      type: object
+      properties:
+        item_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Warm Room Background"
+        item_type:
+          type: string
+          enum: [background, music, cosmetic]
+          example: "background"
+        description:
+          type: string
+          example: "A cozy room for the egg."
+        price:
+          type: integer
+          example: 50
+        effect_type:
+          type: string
+          enum: [warmth, glow]
+          nullable: true
+          example: "warmth"
+        effect_value:
+          type: integer
+          nullable: true
+          example: 3
+        asset_url:
+          type: string
+          nullable: true
+          example: "/assets/items/warm-room.png"
+        is_active:
+          type: boolean
+          example: true
+
+    UserItem:
+      type: object
+      properties:
+        user_item_id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        item_id:
+          type: integer
+          example: 1
+        quantity:
+          type: integer
+          example: 1
+        is_equipped:
+          type: boolean
+          example: false
+        purchased_at:
+          type: string
+          format: date-time
+          example: "2026-05-22T13:00:00Z"
+
+    # 2. REQUEST SCHEMAS
+    # Request bodies used by POST / PATCH endpoints.
+    RegisterRequest:
+      type: object
+      required: [email, password, nickname]
+      properties:
+        email:
+          type: string
+          example: "junu@example.com"
+        password:
+          type: string
+          format: password
+          example: "secret123"
+        nickname:
+          type: string
+          example: "XxHEROxX"
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          example: "junu@example.com"
+        password:
+          type: string
+          format: password
+          example: "secret123"
+
+    EquipEggRequest:
+      type: object
+      required: [item_id]
+      properties:
+        item_id:
+          type: integer
+          example: 3
+
+    CreatePostRequest:
+      type: object
+      required: [title, content, tag, visibility]
+      properties:
+        title:
+          type: string
+          example: "Today I studied backend routing"
+        content:
+          type: string
+          example: "I implemented post APIs and connected them to the egg system."
+        image_url:
+          type: string
+          nullable: true
+          example: "https://example.com/memory.png"
+        tag:
+          type: string
+          enum: [general, food, study]
+          example: "study"
+        visibility:
+          type: string
+          enum: [private, public, anonymous]
+          example: "private"
+
+    PurchaseRequest:
+      type: object
+      required: [item_id]
+      properties:
+        item_id:
+          type: integer
+          example: 1
+
+    # 3. RESPONSE SCHEMAS
+    # Response bodies returned by the REST endpoints.
+    RegisterResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        egg:
+          $ref: '#/components/schemas/Egg'
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
+        user:
+          $ref: '#/components/schemas/User'
+
+    MeResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        egg:
+          $ref: '#/components/schemas/Egg'
+        active_background:
+          allOf:
+            - $ref: '#/components/schemas/ShopItem'
+          nullable: true
+        active_music:
+          allOf:
+            - $ref: '#/components/schemas/ShopItem'
+          nullable: true
+        active_decoration:
+          allOf:
+            - $ref: '#/components/schemas/ShopItem'
+          nullable: true
+
+    EquipEggResponse:
+      type: object
+      properties:
+        egg:
+          $ref: '#/components/schemas/Egg'
+
+    PostResponse:
+      type: object
+      properties:
+        post:
+          $ref: '#/components/schemas/Post'
+
+    PostListResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+
+    TodayQuest:
+      type: object
+      properties:
+        userQuest:
+          $ref: '#/components/schemas/UserQuest'
+        quest:
+          $ref: '#/components/schemas/Quest'
+
+    TodayQuestListResponse:
+      type: object
+      properties:
+        quests:
+          type: array
+          items:
+            $ref: '#/components/schemas/TodayQuest'
+
+    ClaimQuestResponse:
+      type: object
+      properties:
+        userQuest:
+          $ref: '#/components/schemas/UserQuest'
+        willBalance:
+          type: integer
+          example: 130
+
+    ShopItemListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShopItem'
+
+    PurchaseResponse:
+      type: object
+      properties:
+        userItem:
+          $ref: '#/components/schemas/UserItem'
+        item:
+          $ref: '#/components/schemas/ShopItem'
+        willBalance:
+          type: integer
+          example: 70
+
+    InventoryItem:
+      type: object
+      properties:
+        userItem:
+          $ref: '#/components/schemas/UserItem'
+        item:
+          $ref: '#/components/schemas/ShopItem'
+
+    InventoryResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryItem'
+
+paths:
+  # 0. SYSTEM CHECK
+  # This is backend health check
+  /api/health:
+    get:
+      summary: Check backend server status
+      tags: [System Check]
+      responses:
+        "200":
+          description: Server is running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # 1. AUTHENTICATION
+  # - POST /api/auth/register
+  # - POST /api/auth/login
+  # - GET  /api/me
+  /api/auth/register:
+    post:
+      summary: Register new user and create starter egg
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        "201":
+          description: User and starter egg created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        "400":
+          description: Missing or invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Conflict Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      summary: Login user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        "400":
+          description: Missing or invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/me:
+    get:
+      summary: Get current user profile, egg, and equipped items
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # 2. EGG
+  # - PATCH /api/me/egg/equip
+  /api/me/egg/equip:
+    patch:
+      summary: Equip background, music, or cosmetic item to egg
+      tags: [Egg]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipEggRequest'
+      responses:
+        "200":
+          description: Item equipped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipEggResponse'
+        "400":
+          description: Invalid item for equip action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Item not found or not owned by user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # 3. POST / NOTEBOOK
+  # - POST   /api/posts
+  # - GET    /api/posts/all
+  # - GET    /api/posts/:id
+  # - DELETE /api/posts/:id
+  /api/posts:
+    post:
+      summary: Create post
+      tags: [Post / Notebook]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        "400":
+          description: Missing or invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/posts/all:
+    get:
+      summary: Get all posts created by current user
+      tags: [Post / Notebook]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User post list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostListResponse'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/posts/{id}:
+    get:
+      summary: Get one post
+      tags: [Post / Notebook]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Post ID
+      responses:
+        "200":
+          description: One post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete own post
+      tags: [Post / Notebook]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Post ID
+      responses:
+        "204":
+          description: Post deleted successfully
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # 4. QUEST
+  # - GET  /api/quests/today
+  # - POST /api/quests/:id/claim
+  /api/quests/today:
+    get:
+      summary: Get today's assigned quests
+      tags: [Quest]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Today's assigned quests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodayQuestListResponse'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/quests/{id}/claim:
+    post:
+      summary: Claim completed quest reward
+      tags: [Quest]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Quest ID from today's assigned quest
+      responses:
+        "200":
+          description: Quest reward claimed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimQuestResponse'
+        "400":
+          description: Quest is not completed yet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Quest assignment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Quest reward already claimed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # 5. SHOP / INVENTORY
+  # - GET  /api/shop/items
+  # - POST /api/shop/purchase
+  # - GET  /api/me/inventory
+  /api/shop/items:
+    get:
+      summary: Browse shop items
+      tags: [Shop / Inventory]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Available shop items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShopItemListResponse'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/shop/purchase:
+    post:
+      summary: Buy item with will
+      tags: [Shop / Inventory]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseRequest'
+      responses:
+        "201":
+          description: Item purchased successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseResponse'
+        "400":
+          description: Missing or invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Insufficient will balance or purchase conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/me/inventory:
+    get:
+      summary: View owned items
+      tags: [Shop / Inventory]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user's inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryResponse'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
