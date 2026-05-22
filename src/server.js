@@ -13,6 +13,24 @@ app.use( //Enable CORS for frontend
 
 app.use(express.json());
 
+// 404 handler for unknown routes
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Not Found",
+    message: `${req.method} ${req.originalUrl} does not exist`
+  });
+});
+
+// Basic error handler
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  res.status(500).json({
+    error: "Internal Server Error",
+    message: "Something went wrong on the server"
+  });
+});
+
 app.get("/api/health", (req, res) => { //Endpoint route used to check the backend server run status.
   res.status(200).json({
     status: "ok",
