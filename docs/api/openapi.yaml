@@ -6,7 +6,7 @@ info:
     Nacimiento API with SQLite persistence and JWT-based authentication.
     Public endpoints are limited to register and login.
     User, egg, post, quest, shop, and inventory endpoints require a Bearer token
-    obtained from POST /api/auth/login.
+    obtained from POST /api/auth/login. User-related endpoints are grouped under /api/auth to ensure auth.
 
 servers:
   - url: http://localhost:5000
@@ -15,15 +15,15 @@ tags:
   - name: System Check
     description: Optional backend health check endpoint.
   - name: Authentication
-    description: Register, login, and current user profile APIs.
+    description: Register, login, current user profile, and owned item APIs.
   - name: Egg
-    description: Egg state and equipped item APIs.
+    description: Egg object APIs, including equipped background, music, and cosmetic items.
   - name: Post / Notebook
     description: User memory post APIs.
   - name: Quest
     description: Daily quest and reward claim APIs.
   - name: Shop / Inventory
-    description: Shop browsing, purchase, and owned item APIs.
+    description: Shop browsing and purchase APIs.
 
 components:
   securitySchemes:
@@ -113,7 +113,7 @@ components:
           type: integer
           nullable: true
           example: null
-        active_decoration_id:
+        active_cosmetic_id:
           type: integer
           nullable: true
           example: 7
@@ -389,7 +389,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/ShopItem'
           nullable: true
-        active_decoration:
+        active_cosmetic:
           allOf:
             - $ref: '#/components/schemas/ShopItem'
           nullable: true
@@ -492,7 +492,8 @@ paths:
   # 1. AUTHENTICATION
   # - POST /api/auth/register
   # - POST /api/auth/login
-  # - GET  /api/me
+  # - GET  /api/auth/me
+  # - GET  /api/auth/me/inventory
   /api/auth/register:
     post:
       summary: Register new user and create starter egg
@@ -553,15 +554,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /api/me:
+  /api/auth/me:
     get:
-      summary: Get current user profile, egg, and equipped items
+      summary: Get current user profile, egg, background, music, and cosmetic items
       tags: [Authentication]
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Current user information
+          description: Current user profile with egg and equipped items
           content:
             application/json:
               schema:
@@ -573,9 +574,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /api/auth/me/inventory:
+    get:
+      summary: View owned items
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user's inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryResponse'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   # 2. EGG
-  # - PATCH /api/me/egg/equip
-  /api/me/egg/equip:
+  # - PATCH /api/egg/equip
+  /api/egg/equip:
     patch:
       summary: Equip background, music, or cosmetic item to egg
       tags: [Egg]
@@ -802,7 +823,6 @@ paths:
   # 5. SHOP / INVENTORY
   # - GET  /api/shop/items
   # - POST /api/shop/purchase
-  # - GET  /api/me/inventory
   /api/shop/items:
     get:
       summary: Browse shop items
@@ -867,22 +887,3 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /api/me/inventory:
-    get:
-      summary: View owned items
-      tags: [Shop / Inventory]
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Current user's inventory
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InventoryResponse'
-        "401":
-          description: Missing or invalid token
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
