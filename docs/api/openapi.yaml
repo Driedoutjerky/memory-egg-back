@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Nacimiento API
-  version: 0.1.0
+  version: 0.1.1
   description: |
     Nacimiento API with SQLite persistence and JWT-based authentication.
     Public endpoints are limited to register and login.
