@@ -19,6 +19,8 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/shopController");
 
-// currently use params
 router.get("/items", controller.getAll);
+
+// currently use params for user identification
+router.post("/purchase/:id", controller.purchase);
 module.exports = router;
