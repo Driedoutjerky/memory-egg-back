@@ -16,7 +16,7 @@ const { open } = require("sqlite");
 const eggModel = require("./models/eggModel");
 const postModel = require("./models/postModel");
 // const questModel = require("./models/questModel");
-// const shopItemModel = require("./models/shopItemModel");
+const shopItemModel = require("./models/shopItemModel");
 
 async function initDb() {
   const db = await open({
@@ -30,11 +30,11 @@ async function initDb() {
   // await db.exec("PRAGMA foreign_keys = ON");
 
   // Initialize each table
-  // await userModel.createTable(db);
-  // await shopItemModel.createTable(db);
+  // await userModel.initDb(db);
+  await shopItemModel.initDb(db);
   await eggModel.initDb(db);
   await postModel.initDb(db);
-  // await questModel.createTable(db);
+  // await questModel.initDb(db);
 
   return db;
 }
