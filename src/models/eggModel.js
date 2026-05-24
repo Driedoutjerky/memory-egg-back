@@ -33,7 +33,12 @@ async function initDb(db){
       active_background_id INTEGER,
       active_music_id INTEGER,
       active_cosmetic_id INTEGER,
-      updated_at STRING NOT NULL
+      updated_at STRING NOT NULL,
+
+      FOREIGN KEY (user_id) REFERENCES users(user_id),
+      FOREIGN KEY (active_background_id) REFERENCES shop_items(item_id),
+      FOREIGN KEY (active_music_id) REFERENCES shop_items(item_id),
+      FOREIGN KEY (active_cosmetic_id) REFERENCES shop_items(item_id)
     );
   `);
   // Seed initial data if the table is empty
