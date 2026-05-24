@@ -124,7 +124,7 @@ async function create(user_id) {
     let glow = 0;
     let warmth = 0;
     let weight = 0; 
-    let updated_at = new Date().toISOString(),
+    let updated_at = new Date().toISOString();
     const result = await getDb().run(
     "INSERT INTO eggs (user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [user_id, stage, glow, warmth, weight, NULL, NULL, NULL, updated_at]
@@ -141,7 +141,7 @@ async function remove(user_id) {
 
 // Updates an egg (UPDATE)
 // false 
-async function update({egg_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at}){
+async function update({egg_id, user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at}){
     const result = await getDb().run(
     `
     UPDATE eggs
@@ -153,8 +153,8 @@ async function update({egg_id, stage, glow, warmth, weight, active_background_id
       active_background_id = ?, 
       active_music_id = ?, 
       active_cosmetic_id = ?,
-      updated_at = ?, 
-    WHERE user_id = ?
+      updated_at = ? 
+    WHERE egg_id = ?
     `,
     [
       stage,
