@@ -20,7 +20,7 @@ const YAML = require("yamljs");
 const { initDb } = require("./db");
 
 // const authRouter = require("./routes/authRoutes");
-// const eggRouter = require("./routes/eggRoutes");
+const eggRouter = require("./routes/eggRoutes");
 const postsRouter = require("./routes/postRoutes");
 // const questRouter = require("./routes/questRoutes");
 // const shopRouter = require("./routes/shopRoutes");
@@ -42,7 +42,7 @@ app.use(express.static("public"));
 // All routes defined in routes/flights.js are mounted under /flights.
 // So a router definition of `router.get("/:id", ...)` becomes GET /flights/:id.
 // app.use("api/auth", authRouter);
-// app.use("/api/me/egg", eggRouter);
+app.use("/api/egg", eggRouter);
 app.use("/api/posts", postsRouter);
 // app.use("/api/quests", questRouter);
 // app.use("/api/shop", shopRouter);
