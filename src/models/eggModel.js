@@ -129,7 +129,7 @@ async function create(user_id) {
     "INSERT INTO eggs (user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [user_id, stage, glow, warmth, weight, NULL, NULL, NULL, updated_at]
   );
-  return { id: result.lastID, user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at};
+  return {egg_id: result.lastID, user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at};
 }
 
 // Deletes an egg by user_id. Returns true if a row was actually removed, (DELETE)
