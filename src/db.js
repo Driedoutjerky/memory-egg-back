@@ -8,9 +8,6 @@
 //   4. Expose the shared database connection to the rest of the application
 // =============================================================================
 
-const sqlite3 = require("sqlite3");
-const sqlite = require("sqlite");
-
 // src/db.js
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
@@ -32,13 +29,14 @@ async function initDb() {
   // But just comment it since we are now making one by one.
   // await db.exec("PRAGMA foreign_keys = ON");
 
+  // Initialize each table
   // await userModel.createTable(db);
   // await shopItemModel.createTable(db);
-  await eggModel.createTable(db);
-  await postModel.createTable(db);
+  await eggModel.initDb(db);
+  await postModel.initDb(db);
   // await questModel.createTable(db);
 
   return db;
 }
 
-module.exports = initDb;
+module.exports = {initDb};
