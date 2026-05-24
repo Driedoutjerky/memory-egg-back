@@ -17,6 +17,7 @@ const eggModel = require("./models/eggModel");
 const postModel = require("./models/postModel");
 // const questModel = require("./models/questModel");
 const shopItemModel = require("./models/shopItemModel");
+const userItemModel = require("./models/userItemModel");
 
 async function initDb() {
   const db = await open({
@@ -32,6 +33,7 @@ async function initDb() {
   // Initialize each table
   // await userModel.initDb(db);
   await shopItemModel.initDb(db);
+  await userItemModel.initDb(db);
   await eggModel.initDb(db);
   await postModel.initDb(db);
   // await questModel.initDb(db);
