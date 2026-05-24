@@ -11,122 +11,34 @@
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
 
-const DB_FILE = "./posts.db";
+// src/db.js
+const sqlite3 = require("sqlite3");
+const { open } = require("sqlite");
 
-let db;
+// const userModel = require("./models/userModel");
+const eggModel = require("./models/eggModel");
+const postModel = require("./models/postModel");
+// const questModel = require("./models/questModel");
+// const shopItemModel = require("./models/shopItemModel");
 
 async function initDb() {
-  db = await sqlite.open({
-    filename: DB_FILE,
+  const db = await open({
+    filename: "./database.sqlite",
     driver: sqlite3.Database
   });
 
-  // Create the posts table if it doesn't exist
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS posts (
-      post_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      content TEXT NOT NULL,
-      image_url TEXT,
-      tag TEXT NOT NULL,
-      visibility TEXT NOT NULL,
-      word_count INTEGER NOT NULL,
-      will_reward BOOLEAN NOT NULL,
-      created_at DATETIME NOT NULL,
-      updated_at DATETIME NOT NULL
-    );
-  `);
+  // Enable foreign key constraint checks in SQLite.
+  // For example, an egg cannot reference a user_id that does not exist in the users table.
+  // But just comment it since we are now making one by one.
+  // await db.exec("PRAGMA foreign_keys = ON");
 
-  // Seed initial data if the table is empty
-  const postsCount = await db.get("SELECT COUNT(*) AS count FROM posts");
-  if (postsCount.count === 0) {
-    // Insert sample posts in English
-    const now = new Date().toISOString();
-    await db.run(
-      "INSERT INTO posts (user_id, title, content, image_url, tag, visibility, word_count, will_reward, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        1,
-        "My First Blog Post",
-        "This is the content of my very first post. Excited to share my thoughts!",
-        null,
-        "general",
-        "public",
-        15,
-        true,
-        now,
-        now
-      ]
-    );
-    await db.run(
-      "INSERT INTO posts (user_id, title, content, image_url, tag, visibility, word_count, will_reward, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        1,
-        "Learning Node.js",
-        "Node.js is a powerful runtime for server-side JavaScript. Here's how I got started and what I've learned so far.",
-        "https://example.com/nodejs.jpg",
-        "tech",
-        "public",
-        40,
-        false,
-        now,
-        now
-      ]
-    );
-    await db.run(
-      "INSERT INTO posts (user_id, title, content, image_url, tag, visibility, word_count, will_reward, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        2,
-        "Private Notes",
-        "This is a private post. Only I can see this content.",
-        null,
-        "personal",
-        "private",
-        8,
-        false,
-        now,
-        now
-      ]
-    );
-    await db.run(
-      "INSERT INTO posts (user_id, title, content, image_url, tag, visibility, word_count, will_reward, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        2,
-        "Trip to Seoul",
-        "I visited Seoul last summer and it was an amazing experience! The food, culture, and people were incredible.",
-        "https://example.com/seoul.jpg",
-        "travel",
-        "public",
-        25,
-        true,
-        now,
-        now
-      ]
-    );
-    await db.run(
-      "INSERT INTO posts (user_id, title, content, image_url, tag, visibility, word_count, will_reward, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        3,
-        "How to Build a REST API",
-        "A step-by-step guide to building a RESTful API with Express and SQLite. Perfect for beginners!",
-        "https://example.com/rest-api.jpg",
-        "tutorial",
-        "public",
-        120,
-        true,
-        now,
-        now
-      ]
-    );
-
-    console.log("Database seeded with initial posts.");
-  }
+  // await userModel.createTable(db);
+  // await shopItemModel.createTable(db);
+  await eggModel.createTable(db);
+  await postModel.createTable(db);
+  // await questModel.createTable(db);
 
   return db;
 }
 
-function getDb() {
-  return db;
-}
-
-module.exports = { initDb, getDb };
+module.exports = initDb;
