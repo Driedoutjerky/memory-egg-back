@@ -154,7 +154,7 @@ async function getAll(only_active = 1, item_type = "all"){
     if(item_type != "all"){
         filter_list.push(item_type);
         if(filter_list.length >= 1){
-            sql_query += ", item_type = ?"; 
+            sql_query += "AND item_type = ?"; 
         } else {
             sql_query += "item_type = ?";
         }
@@ -169,7 +169,7 @@ async function findById(item_id) {
 
 // Returns item information by its name so the result can be multiple items, or undefined if no row matches. (READ)
 async function findByName(name) {
-    return await getDb().get("SELECT * FROM shop_items WHERE name = ?", [name]);
+    return await getDb().all("SELECT * FROM shop_items WHERE name = ?", [name]);
 }
 
 // Inserts a new item and returns it including its generated id. (CREATE)
