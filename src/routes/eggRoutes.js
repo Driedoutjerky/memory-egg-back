@@ -24,6 +24,6 @@ const controller = require("../controllers/eggController");
 // So `router.get("/")` becomes `GET /flights`, and
 // `router.get("/:id")` becomes `GET /flights/:id`.
 
-// router.patch("/me/egg/equip", controller.equip);             // PATCH /api/me/egg/equip
+router.patch("/api/egg/equip", controller.equip);             // PATCH /api/egg/equip
 
 // module.exports = router;
