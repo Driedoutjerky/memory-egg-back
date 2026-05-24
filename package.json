@@ -12,9 +12,9 @@
     "test": "jest"
   },
   "dependencies": {
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^4.18.2",
+    "express": "^4.19.2",
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1",
     "swagger-ui-express": "^5.0.1",
@@ -31,14 +31,5 @@
   "bugs": {
     "url": "https://github.com/Driedoutjerky/memory-egg-back/issues"
   },
-  "homepage": "https://github.com/Driedoutjerky/memory-egg-back#readme",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^4.19.2",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
-    "swagger-ui-express": "^5.0.1",
-    "yamljs": "^0.3.0"
-  }
+  "homepage": "https://github.com/Driedoutjerky/memory-egg-back#readme"
 }
