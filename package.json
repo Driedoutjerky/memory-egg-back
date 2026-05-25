@@ -11,13 +11,22 @@
     "start": "node src/server.js",
     "test": "jest"
   },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Driedoutjerky/memory-egg-back.git"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Driedoutjerky/memory-egg-back/issues"
