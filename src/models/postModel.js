@@ -34,7 +34,7 @@ async function initDb(db) {
       tag TEXT NOT NULL,
       visibility TEXT NOT NULL,
       word_count INTEGER NOT NULL,
-      will_reward BOOLEAN NOT NULL,
+      will_reward INTEGER NOT NULL,
       created_at DATETIME NOT NULL,
       updated_at DATETIME NOT NULL
     );
@@ -55,7 +55,7 @@ async function initDb(db) {
         "general",
         "public",
         15,
-        true,
+        100,
         now,
         now
       ]
@@ -70,7 +70,7 @@ async function initDb(db) {
         "tech",
         "public",
         40,
-        false,
+        200,
         now,
         now
       ]
@@ -85,7 +85,7 @@ async function initDb(db) {
         "personal",
         "private",
         8,
-        false,
+        300,
         now,
         now
       ]
@@ -100,7 +100,7 @@ async function initDb(db) {
         "travel",
         "public",
         25,
-        true,
+        400,
         now,
         now
       ]
@@ -115,7 +115,7 @@ async function initDb(db) {
         "tutorial",
         "public",
         120,
-        true,
+        500,
         now,
         now
       ]
