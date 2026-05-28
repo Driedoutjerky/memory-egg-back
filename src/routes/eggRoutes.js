@@ -27,4 +27,5 @@ const controller = require("../controllers/eggController");
 // TODO: After implementing auth middleware, we will not add user_id into params or query.
 // currently use params
 router.patch("/:id/equip", controller.equip);
+router.patch("/:id/unequip", controller.unequip);
 module.exports = router;
