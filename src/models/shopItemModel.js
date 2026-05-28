@@ -141,26 +141,26 @@ function getDb() {
     return shopItemsDb;
 }
 
-async function getAll(only_active = 1, item_type = "all"){
-    let sql_query = "SELECT * FROM shop_items ";
-    let filter_list = [];
-    // is WHERE needed?
-    if(only_active || item_type != "all") sql_query += "WHERE ";
-    
-    if(only_active) {
-        filter_list.push(1);
-        sql_query += "is_active = ?";
+async function getAll(only_active = 1, item_type = "all") {
+    let sql = "SELECT * FROM shop_items";
+    const conditions = [];
+    const params = [];
+
+    if (Number(only_active) === 1) {
+        conditions.push("is_active = ?");
+        params.push(1);
     }
-    if(item_type != "all"){
-        filter_list.push(item_type);
-        if(filter_list.length >= 1){
-            sql_query += "AND item_type = ?"; 
-        } else {
-            sql_query += "item_type = ?";
-        }
+
+    if (item_type !== "all") {
+        conditions.push("item_type = ?");
+        params.push(item_type);
     }
-    return getDb().all(sql_query, filter_list);
-    
+
+    if (conditions.length > 0) {
+        sql += " WHERE " + conditions.join(" AND ");
+    }
+
+    return getDb().all(sql, params);
 }
 // Returns item information by id, or undefined if no row matches. (READ)
 async function findById(item_id) {
