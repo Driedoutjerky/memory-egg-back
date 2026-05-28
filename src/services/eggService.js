@@ -28,13 +28,13 @@ async function equip({ user_id, item_id }) {
     }
     // TODO: 3) identify what kind of this item 
     let itemType = item.item_type;
-    let prior = egg[`active_${itemType}_id`];
 
     if (!ALLOWED_ITEM_TYPES.has(itemType)) {
         const error = new Error("Invalid item type");
         error.statusCode = 400;
         throw error;
     }
+    let prior = egg[`active_${itemType}_id`];
 
     // if there is an item which is already equipped, unequip
     if (prior != null && prior !== item_id) {
@@ -97,14 +97,15 @@ async function unequip({ user_id, item_id }) {
     }
     let prior = egg[`active_${itemType}_id`];
 
-    if (prior !== item_id) {
-        const error = new Error("This item is not currently equipped");
-        error.statusCode = 400;
-        throw error;
-    }
     // if there is an item which is already equipped, unequip
     if (prior == null) {
         const error = new Error("No Equipped Item is found");
+        error.statusCode = 400;
+        throw error;
+    }
+    
+    if (prior !== item_id) {
+        const error = new Error("This item is not currently equipped");
         error.statusCode = 400;
         throw error;
     }
