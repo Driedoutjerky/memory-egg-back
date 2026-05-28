@@ -32,7 +32,7 @@ jobs:
         # npm ci currently fails on GitHub Actions due to a package-lock mismatch
         # related to Linux native/optional dependencies. (IDK why...)
         # Use npm install for now
-        run: npm install 
+        run: npm ci 
 
       - name: Run tests
         run: npm test
