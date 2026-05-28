@@ -9,7 +9,7 @@ info:
     obtained from POST /api/auth/login. User-related endpoints are grouped under /api/auth to ensure auth.
 
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:5000
 
 tags:
   - name: System Check
