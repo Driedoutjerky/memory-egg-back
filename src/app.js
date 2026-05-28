@@ -1,3 +1,18 @@
+// =============================================================================
+// app.js — Application entry point
+// -----------------------------------------------------------------------------
+// This file is responsible for wiring everything together:
+//   - Loading middleware (JSON parsing, static files)
+//   - Mounting the routers
+//   - Setting up Swagger documentation
+//   - Initializing the database
+//   - Starting the HTTP server
+//
+// app.js does not contain business logic. The business logic lives in the
+// controllers; the database logic lives in the models. Keeping app.js small
+// makes the project easier to navigate.
+// =============================================================================
+
 const express = require("express");
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
@@ -24,17 +39,12 @@ app.get("/api/health", (req, res) => { //Endpoint route used to check the backen
 app.use(express.static("public"));
 
 // app.use("api/auth", authRouter);
-// app.use("/api/egg", eggRouter);
 app.use("/api/egg", eggRouter);
 app.use("/api/posts", postsRouter);
 // app.use("/api/quests", questRouter);
 app.use("/api/shop", shopRouter);
 
 
-// const swaggerDocument = YAML.load("./openapi.yaml");
-// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-// Swagger UI: interactive API documentation generated from the YAML spec.
-// Available at http://localhost:8080/api-docs
 const swaggerDocument = YAML.load("./docs/api/openapi.yaml");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -46,16 +56,3 @@ app.use( //Enable CORS for frontend
 );
 
 module.exports = app;
-// Startup sequence: initialize the database first, then start the server.
-// We use an async function because initDb() returns a Promise — the server
-// must wait for the database to be ready before accepting requests.
-async function start() {
-  await initDb();
-  app.listen(PORT, () => {
-    console.log(`Nacimiento API running on http://localhost:${PORT}`);
-    console.log(`Search frontend: http://localhost:${PORT}/`);
-    console.log(`API docs: http://localhost:${PORT}/api-docs`);
-  });
-}
-
-start();
