@@ -138,4 +138,8 @@ function getDb() {
     return questsDb;
 }
 
-module.exports = { initDb, getDb };
+function findById(quest_id){
+    return getDb().get("SELECT * FROM quests WHERE quest_id = ?", [quest_id])
+}
+
+module.exports = { initDb };

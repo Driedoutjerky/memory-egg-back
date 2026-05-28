@@ -125,4 +125,8 @@ function getDb() {
     return userQuestsDb;
 }
 
-module.exports = { initDb, getDb };
+function getIdOfTodaysQuest(date){
+    return getDb().get("SELECT quest_id FROM user_quests WHERE assigned_date = ?", [date]);
+}
+
+module.exports = { initDb, getIdOfTodaysQuest };
