@@ -12,10 +12,11 @@
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
 
-// const userModel = require("./models/userModel");
+const userModel = require("./models/userModel");
 const eggModel = require("./models/eggModel");
 const postModel = require("./models/postModel");
-// const questModel = require("./models/questModel");
+const questModel = require("./models/questModel");
+const userQuestModel = require("./models/userQuestModel");
 const shopItemModel = require("./models/shopItemModel");
 const userItemModel = require("./models/userItemModel");
 
@@ -30,13 +31,14 @@ async function initDb() {
   // But just comment it since we are now making one by one.
   // await db.exec("PRAGMA foreign_keys = ON");
 
-  // Initialize each table
-  // await userModel.initDb(db);
-  await shopItemModel.initDb(db);
-  await userItemModel.initDb(db);
+  // Initialize each table the order should be correct since some tables are referring other table (userItems -> shop_items)
+  await userModel.initDb(db);
   await eggModel.initDb(db);
+  await shopItemModel.initDb(db);
+  await questModel.initDb(db);
   await postModel.initDb(db);
-  // await questModel.initDb(db);
+  await userItemModel.initDb(db);
+  await userQuestModel.initDb(db);
 
   return db;
 }
