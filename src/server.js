@@ -7,7 +7,7 @@ async function start() {
   app.listen(PORT, () => {
     console.log(`Nacimiento API running on http://localhost:${PORT}`);
     console.log(`Search frontend: http://localhost:${PORT}/`);
-    //console.log(`API docs: http://localhost:${PORT}/api-docs`);
+    console.log(`API docs: http://localhost:${PORT}/api-docs`);
   });
 }
 
