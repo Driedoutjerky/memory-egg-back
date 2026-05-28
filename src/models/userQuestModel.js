@@ -125,11 +125,14 @@ function getDb() {
     return userQuestsDb;
 }
 
-async function getIdOfTodaysQuest(date,userId){
-    return getDb().get(
+async function getIdOfTodaysQuests(date, userId) {
+    console.log("call with:", { date, userId }); 
+    const result = await getDb().all(
         "SELECT quest_id FROM user_quests WHERE assigned_date = ? AND user_id = ?",
         [date, userId]
     );
+    console.log("Result:", result); 
+    return result;
 }
 
-module.exports = { initDb, getIdOfTodaysQuest };
+module.exports = { initDb, getIdOfTodaysQuests };

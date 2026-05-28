@@ -13,6 +13,6 @@ const controller = require("../controllers/questController");
 // All paths here are RELATIVE to the prefix that was given when this router
 // was mounted in app.js: `app.use("/api/quests", questRouter);`
 
-router.get("/today", controller.getTodaysQuest);
+router.get("/today", controller.getTodaysQuests);
 
 module.exports = router;
