@@ -1,4 +1,4 @@
-name: Backend Tests
+name: Backend Tests for CI
 
 on:
   pull_request:
@@ -26,14 +26,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
-
+          
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm ci
 
       - name: Run tests
         run: npm test
