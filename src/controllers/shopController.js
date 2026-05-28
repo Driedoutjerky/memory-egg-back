@@ -23,19 +23,19 @@ const shopItemModel = require("../models/shopItemModel");
 const shopService = require("../services/shopService");
 
 // Added more flexibilty for further filtering.
+// e.g. url?item_type=all&only_active=1
 // response code:
 //      - 200 : OK
 async function getAll(req, res) {
-    let { item_type, only_active } = req.body;
+    let { item_type, only_active } = req.query;
 
     if (item_type === undefined) item_type = "all";
     if (only_active === undefined) only_active = 1;
 
     const items = await shopItemModel.getAll(only_active, item_type);
 
-    res.status(200).json(items);
+    return res.status(200).json(items);
 }
-
 
 // Enable the user to purchase the item
 async function purchase(req, res) {
