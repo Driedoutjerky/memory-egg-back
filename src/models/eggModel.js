@@ -129,7 +129,7 @@ async function create(user_id) {
     let glow = 0;
     let warmth = 0;
     let weight = 0; 
-    let updated_at = new Date().toISOString();
+    let updated_at = new Date().toISOString().split("T")[0];
     const result = await getDb().run(
     "INSERT INTO eggs (user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [user_id, stage, glow, warmth, weight, null, null, null, updated_at]
