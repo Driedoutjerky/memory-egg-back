@@ -24,7 +24,7 @@ const controller = require("../controllers/eggController");
 // So `router.get("/")` becomes `GET /flights`, and
 // `router.get("/:id")` becomes `GET /flights/:id`.
 
-// TODO: After implementing auth middleware, we will not add usesr_id into params or query.
+// TODO: After implementing auth middleware, we will not add user_id into params or query.
 // currently use params
-router.patch("/equip/:id", controller.equip);
+router.patch("/:id/equip", controller.equip);
 module.exports = router;

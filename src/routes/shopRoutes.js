@@ -22,5 +22,5 @@ const controller = require("../controllers/shopController");
 router.get("/items", controller.getAll);
 
 // currently use params for user identification
-router.post("/purchase/:id", controller.purchase);
+router.post("/:id/purchase", controller.purchase);
 module.exports = router;
