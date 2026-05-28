@@ -54,7 +54,7 @@ async function initDb(db){
         active_background_id: null,
         active_music_id: null,
         active_cosmetic_id: null,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString().split('T')[0]
       },
       {
         user_id: 2,
@@ -65,7 +65,7 @@ async function initDb(db){
         active_background_id: 1,
         active_music_id: null,
         active_cosmetic_id: 2,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString().split('T')[0]
       },
       {
         user_id: 3,
@@ -76,7 +76,7 @@ async function initDb(db){
         active_background_id: 2,
         active_music_id: 1,
         active_cosmetic_id: 3,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString().split('T')[0]
       }
     ];
 
@@ -132,15 +132,26 @@ async function create(user_id) {
     let updated_at = new Date().toISOString();
     const result = await getDb().run(
     "INSERT INTO eggs (user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [user_id, stage, glow, warmth, weight, NULL, NULL, NULL, updated_at]
+    [user_id, stage, glow, warmth, weight, null, null, null, updated_at]
   );
-  return {egg_id: result.lastID, user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at};
+  return {
+    egg_id: result.lastID,
+    user_id,
+    stage,
+    glow,
+    warmth,
+    weight,
+    active_background_id: null,
+    active_music_id: null,
+    active_cosmetic_id: null,
+    updated_at
+};
 }
 
-// Deletes an egg by user_id. Returns true if a row was actually removed, (DELETE)
+// Deletes an egg by egg_id. Returns true if a row was actually removed, (DELETE)
 // false if no row matched the id.
-async function remove(user_id) {
-  const result = await getDb().run("DELETE FROM eggs WHERE user_id = ?", [user_id]);
+async function remove(egg_id) {
+  const result = await getDb().run("DELETE FROM eggs WHERE egg_id = ?", [egg_id]);
   return result.changes > 0;
 }
 
@@ -169,7 +180,7 @@ async function update({egg_id, user_id, stage, glow, warmth, weight, active_back
       active_background_id, 
       active_music_id, 
       active_cosmetic_id,
-      new Date().toISOString(),
+      new Date().toISOString().split('T')[0],
       egg_id
     ]
   );
