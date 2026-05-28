@@ -19,9 +19,8 @@ const router = express.Router();
 const controller = require("../controllers/postController");
 
 // All paths here are RELATIVE to the prefix that was given when this router
-// was mounted in app.js: `app.use("/flights", flightsRouter)`.
-// So `router.get("/")` becomes `GET /flights`, and
-// `router.get("/:id")` becomes `GET /flights/:id`.
+// was mounted in app.js: `app.use("/api/posts", postsRouter);`.
+
 
 router.get("/all", controller.getAll);                          
 router.get("/:id", controller.getById);                      

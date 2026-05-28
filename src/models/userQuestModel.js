@@ -49,7 +49,7 @@ async function initDb(db) {
     );
 
     if (userQuestsCount.count === 0) {
-        const now = new Date().toISOString();
+        const now = new Date().toISOString().split('T')[0];
 
         const userQuestMockData = [
             {
@@ -125,8 +125,11 @@ function getDb() {
     return userQuestsDb;
 }
 
-function getIdOfTodaysQuest(date){
-    return getDb().get("SELECT quest_id FROM user_quests WHERE assigned_date = ?", [date]);
+async function getIdOfTodaysQuest(date,userId){
+    return getDb().get(
+        "SELECT quest_id FROM user_quests WHERE assigned_date = ? AND user_id = ?",
+        [date, userId]
+    );
 }
 
 module.exports = { initDb, getIdOfTodaysQuest };

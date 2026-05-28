@@ -4,12 +4,15 @@ const today = new Date().toISOString().split('T')[0];
 
 const questModel = require("../models/questModel");
 const userQuestModel = require("../models/userQuestModel");
-const quest_id_todays_quest = userQuestModel.getIdOfTodaysQuest(today);
+
+const userId = 2;
 
 
-function getTodaysQuest (req, res){
+async function getTodaysQuest (req, res){
     try{
-        const todaysQuest = await questModel.findById(quest_id_todays_quest);
+        const questIdTodaysQuest = await userQuestModel.getIdOfTodaysQuest(today, userId);
+        // questIdTodaysQuest is an Object -> we need to get the value of "quest_id":
+        const todaysQuest = await questModel.findById(questIdTodaysQuest?.quest_id);
         res.status(200).json(todaysQuest);
     } catch (err){
         console.error(err);
