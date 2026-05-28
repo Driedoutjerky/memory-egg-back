@@ -88,8 +88,29 @@ async function initDb(db) {
   return db;
 }
 
-function getDb() {
+async function getDb() {
   return usersDb;
 }
 
-module.exports = { initDb, getDb };
+async function findById(user_id) {
+    return await usersDb.get("SELECT * FROM users WHERE user_id = ?", [user_id]);
+}
+
+async function update(user_id, key_name, updated_value){
+  let user = await findById(user_id);
+  const result = await usersDb.run(
+        `
+    UPDATE users
+    SET
+      ${key_name} = ?
+    WHERE user_id = ?
+    `,
+        [
+          updated_value,
+          user_id
+        ]
+    );
+    return result.changes > 0;
+}
+
+module.exports = { initDb, findById, update};
