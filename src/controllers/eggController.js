@@ -20,18 +20,18 @@
 // =============================================================================
 
 const eggModel = require("../models/eggModel");
-
-// in this case, we will use egg_id to find
-async function getById(req, res){
-    try{
-        const egg_id = Number(req.params.id);
-        const egg = await eggModel.findById(egg_id);
-        if(!egg) return res.status(404).json({error: `Egg (id: ${egg_id}) not found`});
-        return res.status(200).json(egg);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Database error" });
-    }
+const eggService = require("../services/eggService");
+// in this case, we will use user_id to find
+async function findById(req, res) {
+  try {
+    const user_id = Number(req.params.id);
+    const egg = await eggModel.findById(user_id);
+    if (!egg) return res.status(404).json({ error: `Egg of this user is not found` });
+    return res.status(200).json(egg);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error" });
+  }
 }
 
 
@@ -43,7 +43,7 @@ async function create(req, res) {
     // Without this, an INSERT with NULL would fail at the database level
     // because of the NOT NULL constraints we defined in db.js.
     if (user_id === undefined) {
-    return res.status(400).json({ error: "Missing required fields (user_id)" });
+      return res.status(400).json({ error: "Missing required fields (user_id)" });
     }
 
     const newEgg = await eggModel.create(user_id);
@@ -62,7 +62,7 @@ async function create(req, res) {
 async function remove(req, res) {
   try {
     const egg_id = Number(req.params.id);
-    const removed = await postModel.remove(post_id);
+    const removed = await eggModel.remove(egg_id);
     if (!removed) return res.status(404).json({ error: "Egg not found" });
     // 204 No Content: the request succeeded and there is nothing to return.
     res.status(204).send();
@@ -79,31 +79,53 @@ async function remove(req, res) {
 //      - 400 : Bad Request : Invalid item for equip action (This response requires the existing ShopItem Table)
 //      - 401 : Unauthorized (this response will be fully implemented after auth implementation)
 //      - 404 : there is an egg owned by user_id, but the item is not found or the user don't have the item
-async function equip(req, res){
-    const {item_id} = req.body;
-    const user_id = Number(req.params.id);
-    if(item_id === undefined || user_id === NaN){
-      return res.status(400).json({error: "Missing required fields" });
-    }
-    let egg = await eggModel.findById(user_id);
+async function equip(req, res) {
+  const user_id = Number(req.params.id);
+  const item_id = Number(req.body.item_id);
 
-    // TODO: 1) check whether the requested item is valid
+  if (
+    !Number.isInteger(user_id) || user_id <= 0 ||
+    !Number.isInteger(item_id) || item_id <= 0
+  ) {
+    return res.status(400).json({ error: "Missing or invalid required fields" });
+  }
 
-    // TODO: 2) check whether the requested item is owned by this user.
+  try {
+    const result = await eggService.equip({
+      user_id,
+      item_id
+    });
 
-    // TODO: 3) identify what kind of this item 
-
-    // currently, suppose that the item is background (just for db test)
-    egg.active_background_id = item_id;
-    // equip item
-    let flag = await eggModel.update(egg);
-    if(flag){
-      egg = eggModel.findById(user_id);
-      res.status(200).json(egg)
-    } else {
-      res.status(500).json({ error: "Database error" });
-    }
-
+    return res.status(200).json({ egg: result });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      error: error.message || "Failed to equip item"
+    });
+  }
 }
 
-module.exports = {getById, create, remove, equip};
+async function unequip(req, res) {
+  const user_id = Number(req.params.id);
+  const item_id = Number(req.body.item_id);
+  if (
+    !Number.isInteger(user_id) || user_id <= 0 ||
+    !Number.isInteger(item_id) || item_id <= 0
+  ) {
+    return res.status(400).json({ error: "Missing or invalid required fields" });
+  }
+
+  try {
+    const result = await eggService.unequip({
+      user_id,
+      item_id
+    });
+
+    return res.status(200).json({ egg: result });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      error: error.message || "Failed to unequip item"
+    });
+  }
+}
+
+module.exports = { findById, create, remove, equip, unequip};
