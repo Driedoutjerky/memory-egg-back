@@ -12,6 +12,13 @@ const postsRouter = require("./routes/postRoutes");
 
 const app = express();
 
+app.use( //Enable CORS for frontend
+  cors({
+    origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
+    credentials: true
+  })
+);
+
 app.use(express.json());
 
 app.get("/api/health", (req, res) => { //Endpoint route used to check the backend server run status.
@@ -33,11 +40,6 @@ app.use("/api/posts", postsRouter);
 // const swaggerDocument = YAML.load("./openapi.yaml");
 // app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use( //Enable CORS for frontend
-  cors({
-    origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
-    credentials: true
-  })
-);
+
 
 module.exports = app;
