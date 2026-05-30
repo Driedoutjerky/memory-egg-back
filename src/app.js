@@ -19,7 +19,13 @@ const YAML = require("yamljs");
 const cors = require("cors"); //Cross_origin Resource Sharing. Allows frontend to call backend on localhost with different ports.
 require("dotenv").config(); //Loads environment variables from .env file.
 
-// const authRouter = require("./routes/authRoutes");
+// Auth
+// check there is JWT_SECRET value in .env
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is not configured");
+}
+
+const authRouter = require("./routes/authRoutes");
 const eggRouter = require("./routes/eggRoutes");
 const postsRouter = require("./routes/postRoutes");
 const questRouter = require("./routes/questRoutes");
@@ -45,7 +51,7 @@ app.get("/api/health", (req, res) => { //Endpoint route used to check the backen
 
 app.use(express.static("public"));
 
-// app.use("api/auth", authRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/egg", eggRouter);
 app.use("/api/posts", postsRouter);
 app.use("/api/quests", questRouter);

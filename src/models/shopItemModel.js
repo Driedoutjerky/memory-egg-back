@@ -159,22 +159,22 @@ async function getAll(only_active = 1, item_type = "all") {
     if (conditions.length > 0) {
         sql += " WHERE " + conditions.join(" AND ");
     }
-
-    return getDb().all(sql, params);
+    
+    return shopItemsDb.all(sql, params);
 }
 // Returns item information by id, or undefined if no row matches. (READ)
 async function findById(item_id) {
-    return await getDb().get("SELECT * FROM shop_items WHERE item_id = ?", [item_id]);
+    return await shopItemsDb.get("SELECT * FROM shop_items WHERE item_id = ?", [item_id]);
 }
 
 // Returns item information by its name so the result can be multiple items, or undefined if no row matches. (READ)
 async function findByName(name) {
-    return await getDb().all("SELECT * FROM shop_items WHERE name = ?", [name]);
+    return await shopItemsDb.all("SELECT * FROM shop_items WHERE name = ?", [name]);
 }
 
 // Inserts a new item and returns it including its generated id. (CREATE)
 async function create({ name, item_type, description, price, effect_type = null, effect_value = null, asset_url = null, is_active = 1 }) {
-    const result = await getDb().run(
+    const result = await shopItemsDb.run(
         "INSERT INTO shop_items (name, item_type, description, price, effect_type, effect_value, asset_url, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         [name, item_type, description, price, effect_type, effect_value, asset_url, is_active]
     );
@@ -184,13 +184,13 @@ async function create({ name, item_type, description, price, effect_type = null,
 // Deletes an item by item_id. Returns true if a row was actually removed, (DELETE)
 // false if no row matched the id.
 async function remove(item_id) {
-    const result = await getDb().run("DELETE FROM shop_items WHERE item_id = ?", [item_id]);
+    const result = await shopItemsDb.run("DELETE FROM shop_items WHERE item_id = ?", [item_id]);
     return result.changes > 0;
 }
 
 // Updates item information (UPDATE)
 async function update({ item_id, name, item_type, description, price, effect_type, effect_value, asset_url, is_active }) {
-    const result = await getDb().run(
+    const result = await shopItemsDb.run(
         `
     UPDATE shop_items
     SET
