@@ -17,7 +17,7 @@
 // =============================================================================
 
 let usersDb;
-
+const ALLOWED_USER_FIELDS = new Set(["email", "password_hash", "nickname", "will_balance"]);
 async function initDb(db) {
   usersDb = db;
 
@@ -37,7 +37,7 @@ async function initDb(db) {
   const usersCount = await db.get("SELECT COUNT(*) AS count FROM users");
 
   if (usersCount.count === 0) {
-    const now = new Date().toISOString();
+    const now = new Date().toISOString().split("T")[0];
 
     const userMockData = [
       {
@@ -88,8 +88,29 @@ async function initDb(db) {
   return db;
 }
 
-function getDb() {
+async function getDb() {
   return usersDb;
 }
 
-module.exports = { initDb, getDb };
+async function findById(user_id) {
+    return await usersDb.get("SELECT * FROM users WHERE user_id = ?", [user_id]);
+}
+
+async function update(user_id, key_name, updated_value) {
+  if (!ALLOWED_USER_FIELDS.has(key_name)) {
+    throw new Error("Invalid user field");
+  }
+
+  const result = await usersDb.run(
+    `
+    UPDATE users
+    SET ${key_name} = ?
+    WHERE user_id = ?
+    `,
+    [updated_value, user_id]
+  );
+
+  return result.changes > 0;
+}
+
+module.exports = { initDb, findById, update};
