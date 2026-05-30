@@ -112,4 +112,4 @@ async function update({user_id, item_id, quantity, is_equipped, purchased_at}) {
     return result.changes > 0;
 }
 
-module.exports = {initDb, getAll, findByIds, create, remove, update};
+module.exports = {initDb, getDb, getAll, findByIds, create, remove, update};
