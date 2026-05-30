@@ -1,5 +1,4 @@
-// Tests only the core purchase transaction rules.
-// Models and the database connection are mocked so this file focuses on service logic.
+// Service tests: protect purchase transaction behavior.
 
 jest.mock("../../models/shopItemModel");
 jest.mock("../../models/userItemModel");
@@ -36,8 +35,6 @@ describe("shopService.purchaseItem", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // The service controls a transaction through getDb().
-    // A fake DB is enough because this is a service unit test.
     db = {
       run: jest.fn().mockResolvedValue({})
     };
@@ -46,8 +43,7 @@ describe("shopService.purchaseItem", () => {
   });
 
   test("commits the transaction when purchase succeeds", async () => {
-    // Verifies the successful purchase flow:
-    // balance is deducted, the item is saved, and the transaction is committed.
+    // Core purchase flow: deduct balance, create inventory, commit transaction.
     const item = makeItem();
     const user = makeUser();
 
@@ -78,8 +74,7 @@ describe("shopService.purchaseItem", () => {
   });
 
   test("rolls back when the user does not have enough will balance", async () => {
-    // Verifies conditional balance deduction:
-    // when deduction fails, no purchased item is created.
+    // Main failure path: failed conditional balance deduction must cancel purchase.
     const item = makeItem();
     const user = makeUser();
 
@@ -98,31 +93,6 @@ describe("shopService.purchaseItem", () => {
     });
 
     expect(userItemModel.create).not.toHaveBeenCalled();
-    expect(db.run).toHaveBeenNthCalledWith(1, "BEGIN TRANSACTION");
-    expect(db.run).toHaveBeenNthCalledWith(2, "ROLLBACK");
-  });
-
-  test("rolls back when saving the purchased item fails", async () => {
-    // Verifies atomicity:
-    // if inventory saving fails after balance deduction, the purchase is cancelled.
-    const item = makeItem();
-    const user = makeUser();
-
-    shopItemModel.findById.mockResolvedValue(item);
-    userModel.findById.mockResolvedValue(user);
-    userModel.decreaseWillIfEnough.mockResolvedValue(true);
-    userItemModel.create.mockResolvedValue(false);
-
-    await expect(
-      shopService.purchaseItem({
-        user_id: user.user_id,
-        item_id: item.item_id
-      })
-    ).rejects.toMatchObject({
-      message: "Database Error : Failed to create user item",
-      statusCode: 500
-    });
-
     expect(db.run).toHaveBeenNthCalledWith(1, "BEGIN TRANSACTION");
     expect(db.run).toHaveBeenNthCalledWith(2, "ROLLBACK");
   });

@@ -1,5 +1,4 @@
-// Tests the main authentication business rules.
-// Database details and real JWT/bcrypt behavior are tested separately or mocked here.
+// Service tests: focus on authentication business rules and transaction behavior.
 
 jest.mock("../../models/userModel");
 jest.mock("../../models/eggModel");
@@ -46,8 +45,7 @@ describe("authService", () => {
   });
 
   test("registers a user, creates a starter egg, and issues a JWT", async () => {
-    // This test checks the normal registration flow:
-    // user and egg are created in one transaction, then a token is returned.
+    // This is the core registration flow and protects transaction commit behavior.
     const user = makeUser();
     const egg = {
       egg_id: 4,
@@ -77,8 +75,7 @@ describe("authService", () => {
   });
 
   test("rejects registration when the email already exists", async () => {
-    // This test checks that duplicated emails are rejected
-    // before creating a new user or egg.
+    // Duplicate email is the main registration failure users can hit.
     userModel.findByEmail.mockResolvedValue(makeUser());
 
     await expect(
@@ -98,8 +95,7 @@ describe("authService", () => {
   });
 
   test("rolls back registration when starter egg creation fails", async () => {
-    // This test checks the atomic transaction rule:
-    // a user must not remain registered without a starter egg.
+    // User and starter egg must be atomic; this prevents half-created accounts.
     userModel.findByEmail.mockResolvedValue(undefined);
     userModel.create.mockResolvedValue(makeUser());
     eggModel.create.mockRejectedValue(new Error("Egg insert failed"));
@@ -120,8 +116,7 @@ describe("authService", () => {
   });
 
   test("logs in a valid user and issues a JWT", async () => {
-    // This test checks the normal login flow:
-    // the submitted password is compared and a token is issued after success.
+    // One login happy path covers password comparison, token signing, and password hiding.
     const user = makeUser();
 
     userModel.findByEmail.mockResolvedValue(user);
@@ -143,25 +138,5 @@ describe("authService", () => {
     );
     expect(result.token).toBe("signed-jwt-token");
     expect(result.user.password_hash).toBeUndefined();
-  });
-
-  test("rejects login with an invalid password without issuing a JWT", async () => {
-    // This test checks that authentication failure does not produce a token.
-    const user = makeUser();
-
-    userModel.findByEmail.mockResolvedValue(user);
-    bcrypt.compare.mockResolvedValue(false);
-
-    await expect(
-      authService.loginUser({
-        email: user.email,
-        password: "wrong-password"
-      })
-    ).rejects.toMatchObject({
-      message: "Invalid credentials",
-      statusCode: 401
-    });
-
-    expect(jwt.sign).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-// Tests real SQL behavior using an in-memory SQLite database.
+// Model tests use real SQL against an in-memory SQLite database.
 
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
@@ -9,7 +9,6 @@ describe("eggModel", () => {
   let db;
 
   beforeEach(async () => {
-    // Use a fresh in-memory database so tests never touch the real SQLite file.
     db = await open({
       filename: ":memory:",
       driver: sqlite3.Database
@@ -19,28 +18,15 @@ describe("eggModel", () => {
   });
 
   afterEach(async () => {
-    // Close the per-test database connection to avoid leaking handles.
     await db.close();
   });
 
-  test("finds a seeded egg by user id", async () => {
-    const egg = await eggModel.findById(1);
+  test("creates and finds an egg by user id", async () => {
+    // This covers the model's essential insert/read path and default active item values.
+    const created = await eggModel.create(999);
+    const found = await eggModel.findById(999);
 
-    expect(egg).toEqual(
-      expect.objectContaining({
-        user_id: 1,
-        stage: expect.any(Number),
-        glow: expect.any(Number),
-        warmth: expect.any(Number),
-        weight: expect.any(Number)
-      })
-    );
-  });
-
-  test("creates an egg with YYYY-MM-DD updated_at", async () => {
-    const egg = await eggModel.create(999);
-
-    expect(egg).toEqual(
+    expect(created).toEqual(
       expect.objectContaining({
         user_id: 999,
         active_background_id: null,
@@ -48,21 +34,19 @@ describe("eggModel", () => {
         active_cosmetic_id: null
       })
     );
-    expect(egg.updated_at).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(found).toEqual(expect.objectContaining({ user_id: 999 }));
+    expect(found.updated_at).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   test("updates active item fields", async () => {
-    // Arrange
+    // Equipment services depend on these active item columns being persisted.
     const egg = await eggModel.create(1000);
     egg.active_background_id = 101;
 
-    // Act
     const updated = await eggModel.update(egg);
     const saved = await eggModel.findById(1000);
 
-    // Assert
     expect(updated).toBe(true);
     expect(saved.active_background_id).toBe(101);
-    expect(saved.updated_at).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

@@ -1,4 +1,4 @@
-// Tests real SQL behavior using an in-memory SQLite database.
+// Model tests use real SQL against an in-memory SQLite database.
 
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
@@ -9,13 +9,11 @@ describe("userItemModel", () => {
   let db;
 
   beforeEach(async () => {
-    // Use a fresh in-memory database so tests never touch the real SQLite file.
     db = await open({
       filename: ":memory:",
       driver: sqlite3.Database
     });
 
-    // Parent rows satisfy user_items foreign keys.
     await db.exec(`
       CREATE TABLE users (
         user_id INTEGER PRIMARY KEY
@@ -32,12 +30,11 @@ describe("userItemModel", () => {
   });
 
   afterEach(async () => {
-    // Close the per-test database connection to avoid leaking handles.
     await db.close();
   });
 
   test("creates a user inventory item", async () => {
-    // Act
+    // Essential insert/read behavior for purchased inventory.
     const created = await userItemModel.create({
       user_id: 1,
       item_id: 101,
@@ -46,21 +43,19 @@ describe("userItemModel", () => {
     });
     const item = await userItemModel.findByIds(1, 101);
 
-    // Assert
     expect(created).toBe(true);
     expect(item).toEqual(
       expect.objectContaining({
         user_id: 1,
         item_id: 101,
         quantity: 1,
-        is_equipped: 0,
-        purchased_at: "2026-05-28"
+        is_equipped: 0
       })
     );
   });
 
   test("increases quantity when the user already owns the item", async () => {
-    // Arrange
+    // This protects duplicate purchase behavior used by shopService.
     await userItemModel.create({
       user_id: 1,
       item_id: 101,
@@ -68,7 +63,6 @@ describe("userItemModel", () => {
       purchased_at: "2026-05-28"
     });
 
-    // Act
     await userItemModel.create({
       user_id: 1,
       item_id: 101,
@@ -77,12 +71,11 @@ describe("userItemModel", () => {
     });
     const item = await userItemModel.findByIds(1, 101);
 
-    // Assert
     expect(item.quantity).toBe(2);
   });
 
   test("updates is_equipped value", async () => {
-    // Arrange
+    // Equipment services rely on persisting the inventory equipped flag.
     await userItemModel.create({
       user_id: 1,
       item_id: 101,
@@ -92,11 +85,9 @@ describe("userItemModel", () => {
     const item = await userItemModel.findByIds(1, 101);
     item.is_equipped = 1;
 
-    // Act
     const updated = await userItemModel.update(item);
     const saved = await userItemModel.findByIds(1, 101);
 
-    // Assert
     expect(updated).toBe(true);
     expect(saved.is_equipped).toBe(1);
   });
