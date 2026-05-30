@@ -96,6 +96,45 @@ async function findById(user_id) {
     return await usersDb.get("SELECT * FROM users WHERE user_id = ?", [user_id]);
 }
 
+async function findByEmail(email) {
+  return await usersDb.get(
+    "SELECT * FROM users WHERE email = ?",
+    [email]
+  );
+}
+
+async function create({email, password_hash, nickname, will_balance, created_at}){
+
+  const created_at = new Date().toISOString().split("T")[0];
+
+  const result = await usersDb.run(
+    `
+    INSERT INTO users (
+      email,
+      password_hash,
+      nickname,
+      will_balance,
+      created_at
+    ) VALUES (?, ?, ?, ?, ?)
+    `,
+    [
+      email,
+      password_hash,
+      nickname,
+      will_balance,
+      created_at
+    ]
+  );
+
+  return {
+    user_id: result.lastID,
+    email,
+    nickname,
+    will_balance,
+    created_at
+  };
+}
+
 async function update(user_id, key_name, updated_value) {
   if (!ALLOWED_USER_FIELDS.has(key_name)) {
     throw new Error("Invalid user field");
@@ -113,4 +152,4 @@ async function update(user_id, key_name, updated_value) {
   return result.changes > 0;
 }
 
-module.exports = { initDb, findById, update};
+module.exports = { initDb, getDb, findById, findByEmail, create, update};
