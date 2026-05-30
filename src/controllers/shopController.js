@@ -53,8 +53,8 @@ async function purchase(req, res) {
     // const user_id = req.user.user_id;
     try {
         const user_id = Number(req.params.id);
-        const { item_id } = req.body;
-
+        let { item_id } = req.body;
+        item_id = Number(item_id);
         // there is no information about user
         if (user_id === undefined || user_id <=0 || !Number.isInteger(user_id)) {
             return res.status(400).json({ error: "Missing or invalid user id" });
@@ -68,7 +68,7 @@ async function purchase(req, res) {
         // Conduct service
         const result = await shopService.purchaseItem({
             user_id,
-            item_id: Number(item_id)
+            item_id: item_id
         });
         return res.status(201).json(result);
     }
