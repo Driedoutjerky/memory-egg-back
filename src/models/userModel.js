@@ -103,7 +103,7 @@ async function findByEmail(email) {
   );
 }
 
-async function create({email, password_hash, nickname, will_balance, created_at}){
+async function create({email, password_hash, nickname, will_balance}){
 
   const created_at = new Date().toISOString().split("T")[0];
 
@@ -126,6 +126,8 @@ async function create({email, password_hash, nickname, will_balance, created_at}
     ]
   );
 
+
+  // password_hash shouldn't be released outside of model
   return {
     user_id: result.lastID,
     email,
@@ -165,4 +167,4 @@ async function decreaseWillIfEnough(user_id, price) {
 
   return result.changes > 0;
 }
-module.exports = { initDb, findById, update, decreaseWillIfEnough};
+module.exports = { initDb, findById,findByEmail, create, update, decreaseWillIfEnough};
