@@ -26,15 +26,25 @@ const shopService = require("../services/shopService");
 // e.g. url?item_type=all&only_active=1
 // response code:
 //      - 200 : OK
+//      - 404 : no shop items were found
+//      - 500 : Internal Server Error
 async function getAll(req, res) {
     let { item_type, only_active } = req.query;
 
     if (item_type === undefined) item_type = "all";
     if (only_active === undefined) only_active = 1;
+    try {
 
-    const items = await shopItemModel.getAll(only_active, item_type);
+        const items = await shopItemModel.getAll(only_active, item_type);
+        if(!items) {
+            return res.status(404).json({error: "Shop Items not found"});
+        }
+        return res.status(200).json(items);
+    }
+    catch(err){
+        res.status(500).json({ error: `Database error : ${err}`});
+    }
 
-    return res.status(200).json(items);
 }
 
 // Enable the user to purchase the item
