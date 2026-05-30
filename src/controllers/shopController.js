@@ -26,15 +26,25 @@ const shopService = require("../services/shopService");
 // e.g. url?item_type=all&only_active=1
 // response code:
 //      - 200 : OK
+//      - 404 : no shop items were found
+//      - 500 : Internal Server Error
 async function getAll(req, res) {
     let { item_type, only_active } = req.query;
 
     if (item_type === undefined) item_type = "all";
     if (only_active === undefined) only_active = 1;
+    try {
 
-    const items = await shopItemModel.getAll(only_active, item_type);
+        const items = await shopItemModel.getAll(only_active, item_type);
+        if(!items) {
+            return res.status(404).json({error: "Shop Items not found"});
+        }
+        return res.status(200).json(items);
+    }
+    catch(err){
+        res.status(500).json({ error: `Database error : ${err}`});
+    }
 
-    return res.status(200).json(items);
 }
 
 // Enable the user to purchase the item
@@ -42,23 +52,23 @@ async function purchase(req, res) {
     // after implementing auth, this will be conducted with req.user.user_id
     // const user_id = req.user.user_id;
     try {
-        const user_id = req.params.id;
-        const { item_id } = req.body;
-
+        const user_id = Number(req.params.id);
+        let { item_id } = req.body;
+        item_id = Number(item_id);
         // there is no information about user
-        if (!user_id) {
+        if (user_id === undefined || user_id <=0 || !Number.isInteger(user_id)) {
             return res.status(400).json({ error: "Missing or invalid user id" });
         }
 
         // there is no item_id in body
-        if (item_id === undefined || item_id === null) {
+        if (item_id === undefined || item_id === null || !Number.isInteger(item_id)) {
             return res.status(400).json({ error: "Missing or invalid request body" });
         }
 
         // Conduct service
         const result = await shopService.purchaseItem({
             user_id,
-            item_id: Number(item_id)
+            item_id: item_id
         });
         return res.status(201).json(result);
     }
