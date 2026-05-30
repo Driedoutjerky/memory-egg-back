@@ -120,7 +120,7 @@ describe("shopController.purchase", () => {
   test("returns 201 when purchase succeeds", async () => {
     // Arrange
     const purchaseResult = {
-      user_id: "1",
+      user_id: 1,
       item_id: 101,
       item_name: "Test Shop Item",
       price: 50
@@ -137,7 +137,7 @@ describe("shopController.purchase", () => {
 
     // Assert
     expect(shopService.purchaseItem).toHaveBeenCalledWith({
-      user_id: "1",
+      user_id: 1,
       item_id: 101
     });
     expect(res.status).toHaveBeenCalledWith(201);

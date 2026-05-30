@@ -27,7 +27,7 @@ function makeItem(overrides = {}) {
 // Factory represents the service response shape without depending on real prices or names.
 function makePurchaseResult(overrides = {}) {
   return {
-    user_id: "1",
+    user_id: 1,
     item_id: 101,
     item_name: "Shop Item",
     price: 50,
@@ -92,7 +92,7 @@ describe("POST /api/shop/:id/purchase", () => {
     expect(response.status).toBe(201);
     expect(response.body).toEqual(expect.objectContaining(purchaseResult));
     expect(shopService.purchaseItem).toHaveBeenCalledWith({
-      user_id: "1",
+      user_id: 1,
       item_id: 101
     });
   });

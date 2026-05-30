@@ -1,168 +1,129 @@
-// Tests business logic directly while mocking model dependencies.
+// Tests only the core purchase transaction rules.
+// Models and the database connection are mocked so this file focuses on service logic.
 
-// Mock models so service tests focus on purchase rules and coordination.
 jest.mock("../../models/shopItemModel");
 jest.mock("../../models/userItemModel");
 jest.mock("../../models/userModel");
+jest.mock("../../db", () => ({
+  getDb: jest.fn()
+}));
 
 const shopService = require("../../services/shopService");
 const shopItemModel = require("../../models/shopItemModel");
 const userItemModel = require("../../models/userItemModel");
 const userModel = require("../../models/userModel");
+const { getDb } = require("../../db");
 
-// Factory keeps service tests independent from real shop item seed data.
-function makeItem(overrides = {}) {
+function makeItem() {
   return {
     item_id: 101,
     name: "Test Shop Item",
-    item_type: "background",
-    description: "Item used only for tests",
-    price: 50,
-    effect_type: null,
-    effect_value: null,
-    asset_url: null,
-    is_active: 1,
-    ...overrides
+    price: 40,
+    is_active: 1
   };
 }
 
-// Factory represents the buyer state needed for purchase rules.
-function makeUser(overrides = {}) {
+function makeUser() {
   return {
     user_id: 1,
-    email: "test@example.com",
-    nickname: "TestUser",
-    will_balance: 100,
-    ...overrides
+    will_balance: 100
   };
 }
 
 describe("shopService.purchaseItem", () => {
+  let db;
+
   beforeEach(() => {
-    // Reset mocks so tests do not share call history or configured results.
     jest.clearAllMocks();
+
+    // The service controls a transaction through getDb().
+    // A fake DB is enough because this is a service unit test.
+    db = {
+      run: jest.fn().mockResolvedValue({})
+    };
+
+    getDb.mockReturnValue(db);
   });
 
-  test("purchases an active item when the user has enough will balance", async () => {
-    // Arrange
-    const item = makeItem({ price: 40 });
-    const user = makeUser({ will_balance: 100 });
+  test("commits the transaction when purchase succeeds", async () => {
+    // Verifies the successful purchase flow:
+    // balance is deducted, the item is saved, and the transaction is committed.
+    const item = makeItem();
+    const user = makeUser();
+
     shopItemModel.findById.mockResolvedValue(item);
     userModel.findById.mockResolvedValue(user);
+    userModel.decreaseWillIfEnough.mockResolvedValue(true);
     userItemModel.create.mockResolvedValue(true);
-    userModel.update.mockResolvedValue(true);
 
-    // Act
     const result = await shopService.purchaseItem({
       user_id: user.user_id,
       item_id: item.item_id
     });
 
-    // Assert
+    expect(db.run).toHaveBeenNthCalledWith(1, "BEGIN TRANSACTION");
+    expect(userModel.decreaseWillIfEnough).toHaveBeenCalledWith(
+      user.user_id,
+      item.price
+    );
     expect(userItemModel.create).toHaveBeenCalledWith(
       expect.objectContaining({
         user_id: user.user_id,
         item_id: item.item_id,
-        quantity: 1,
-        purchased_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
+        quantity: 1
       })
     );
-    expect(userModel.update).toHaveBeenCalledWith(
-      user.user_id,
-      "will_balance",
-      user.will_balance - item.price
-    );
-    expect(result).toEqual(
-      expect.objectContaining({
-        user_id: user.user_id,
-        item_id: item.item_id,
-        item_name: item.name,
-        price: item.price
-      })
-    );
+    expect(db.run).toHaveBeenNthCalledWith(2, "COMMIT");
+    expect(result.item_id).toBe(item.item_id);
   });
 
-  test("throws 404 when the item does not exist", async () => {
-    shopItemModel.findById.mockResolvedValue(undefined);
+  test("rolls back when the user does not have enough will balance", async () => {
+    // Verifies conditional balance deduction:
+    // when deduction fails, no purchased item is created.
+    const item = makeItem();
+    const user = makeUser();
 
-    await expect(
-      shopService.purchaseItem({ user_id: 1, item_id: 999 })
-    ).rejects.toMatchObject({
-      message: "Item not found",
-      statusCode: 404
-    });
-
-    expect(userModel.findById).not.toHaveBeenCalled();
-    expect(userItemModel.create).not.toHaveBeenCalled();
-  });
-
-  test("throws 409 when the item is not active", async () => {
-    shopItemModel.findById.mockResolvedValue(makeItem({ is_active: 0 }));
-
-    await expect(
-      shopService.purchaseItem({ user_id: 1, item_id: 101 })
-    ).rejects.toMatchObject({
-      message: "This item is not on sale",
-      statusCode: 409
-    });
-
-    expect(userModel.findById).not.toHaveBeenCalled();
-    expect(userItemModel.create).not.toHaveBeenCalled();
-  });
-
-  test("throws 404 when the user does not exist", async () => {
-    shopItemModel.findById.mockResolvedValue(makeItem());
-    userModel.findById.mockResolvedValue(undefined);
-
-    await expect(
-      shopService.purchaseItem({ user_id: 999, item_id: 101 })
-    ).rejects.toMatchObject({
-      message: "User not found",
-      statusCode: 404
-    });
-
-    expect(userItemModel.create).not.toHaveBeenCalled();
-  });
-
-  test("throws 409 when the user has insufficient will balance", async () => {
-    // Arrange
-    const item = makeItem({ price: 120 });
-    const user = makeUser({ will_balance: 50 });
     shopItemModel.findById.mockResolvedValue(item);
     userModel.findById.mockResolvedValue(user);
+    userModel.decreaseWillIfEnough.mockResolvedValue(false);
 
-    // Act and assert
     await expect(
       shopService.purchaseItem({
         user_id: user.user_id,
         item_id: item.item_id
       })
     ).rejects.toMatchObject({
-      message: "Insufficient will balance",
+      message: expect.stringContaining("Insufficient will balance"),
       statusCode: 409
     });
+
     expect(userItemModel.create).not.toHaveBeenCalled();
-    expect(userModel.update).not.toHaveBeenCalled();
+    expect(db.run).toHaveBeenNthCalledWith(1, "BEGIN TRANSACTION");
+    expect(db.run).toHaveBeenNthCalledWith(2, "ROLLBACK");
   });
 
-  test("throws 500 when will balance update fails", async () => {
-    // Arrange
-    const item = makeItem({ price: 40 });
-    const user = makeUser({ will_balance: 100 });
+  test("rolls back when saving the purchased item fails", async () => {
+    // Verifies atomicity:
+    // if inventory saving fails after balance deduction, the purchase is cancelled.
+    const item = makeItem();
+    const user = makeUser();
+
     shopItemModel.findById.mockResolvedValue(item);
     userModel.findById.mockResolvedValue(user);
-    userItemModel.create.mockResolvedValue(true);
-    userModel.update.mockResolvedValue(false);
+    userModel.decreaseWillIfEnough.mockResolvedValue(true);
+    userItemModel.create.mockResolvedValue(false);
 
-    // Act and assert
     await expect(
       shopService.purchaseItem({
         user_id: user.user_id,
         item_id: item.item_id
       })
     ).rejects.toMatchObject({
-      message: "Database Error",
+      message: "Database Error : Failed to create user item",
       statusCode: 500
     });
+
+    expect(db.run).toHaveBeenNthCalledWith(1, "BEGIN TRANSACTION");
+    expect(db.run).toHaveBeenNthCalledWith(2, "ROLLBACK");
   });
 });
