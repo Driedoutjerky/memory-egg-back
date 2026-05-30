@@ -112,12 +112,9 @@ async function initDb(db){
   return db
 }
 
-function getDb(){
-    return eggsDb;
-}
 // Returns an egg by id, or undefined if no row matches. (READ)
 async function findById(user_id) {
-  return await getDb().get("SELECT * FROM eggs WHERE user_id = ?", [user_id]);
+  return await eggsDb.get("SELECT * FROM eggs WHERE user_id = ?", [user_id]);
 }
 
 
@@ -125,12 +122,12 @@ async function findById(user_id) {
 async function create(user_id) {
     // initial values
     // TODO: I think we should make it clear with initial values of entities 
-    let stage = 0; 
+    let stage = 1; 
     let glow = 0;
     let warmth = 0;
     let weight = 0; 
     let updated_at = new Date().toISOString().split("T")[0];
-    const result = await getDb().run(
+    const result = await eggsDb.run(
     "INSERT INTO eggs (user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [user_id, stage, glow, warmth, weight, null, null, null, updated_at]
   );
@@ -151,14 +148,14 @@ async function create(user_id) {
 // Deletes an egg by egg_id. Returns true if a row was actually removed, (DELETE)
 // false if no row matched the id.
 async function remove(egg_id) {
-  const result = await getDb().run("DELETE FROM eggs WHERE egg_id = ?", [egg_id]);
+  const result = await eggsDb.run("DELETE FROM eggs WHERE egg_id = ?", [egg_id]);
   return result.changes > 0;
 }
 
 // Updates an egg (UPDATE)
 // false 
 async function update({egg_id, user_id, stage, glow, warmth, weight, active_background_id, active_music_id, active_cosmetic_id, updated_at}){
-    const result = await getDb().run(
+    const result = await eggsDb.run(
     `
     UPDATE eggs
     SET

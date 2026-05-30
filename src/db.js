@@ -20,8 +20,10 @@ const userQuestModel = require("./models/userQuestModel");
 const shopItemModel = require("./models/shopItemModel");
 const userItemModel = require("./models/userItemModel");
 
+let db;
+
 async function initDb() {
-  const db = await open({
+  db = await open({
     filename: "./database.sqlite",
     driver: sqlite3.Database
   });
@@ -43,4 +45,8 @@ async function initDb() {
   return db;
 }
 
-module.exports = {initDb};
+function getDb(){
+  return db;
+}
+
+module.exports = {initDb, getDb};

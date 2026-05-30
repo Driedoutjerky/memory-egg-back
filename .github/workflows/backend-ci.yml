@@ -1,0 +1,40 @@
+name: Backend Tests for CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Jest tests
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: test
+      JWT_SECRET: test-only-jwt-secret
+      JWT_EXPIRES_IN: 1h
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          
+      - name: Install dependencies
+       # Temporary workaround:
+        # npm ci currently fails on GitHub Actions due to a package-lock mismatch
+        # related to Linux native/optional dependencies. (IDK why...)
+        # Use npm install for now
+        run: npm install
+
+      - name: Run tests
+        run: npm test
