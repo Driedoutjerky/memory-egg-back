@@ -18,6 +18,8 @@
 
 let usersDb;
 const ALLOWED_USER_FIELDS = new Set(["email", "password_hash", "nickname", "will_balance"]);
+// just for mock data
+const bcrypt = require('bcrypt');
 async function initDb(db) {
   usersDb = db;
 
@@ -42,21 +44,21 @@ async function initDb(db) {
     const userMockData = [
       {
         email: "user1@example.com",
-        password_hash: "mock_password_hash_1",
+        password_hash: await bcrypt.hash("mock_password_hash_1", 10),
         nickname: "MemoryUser1",
         will_balance: 100,
         created_at: now
       },
       {
         email: "user2@example.com",
-        password_hash: "mock_password_hash_2",
+        password_hash: await bcrypt.hash("mock_password_hash_2", 10),
         nickname: "MemoryUser2",
         will_balance: 150,
         created_at: now
       },
       {
         email: "user3@example.com",
-        password_hash: "mock_password_hash_3",
+        password_hash: await bcrypt.hash("mock_password_hash_3", 10),
         nickname: "MemoryUser3",
         will_balance: 200,
         created_at: now
