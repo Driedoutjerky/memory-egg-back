@@ -88,7 +88,7 @@ async function initDb(db) {
   return db;
 }
 
-async function getDb() {
+function getDb() {
   return usersDb;
 }
 
@@ -112,5 +112,18 @@ async function update(user_id, key_name, updated_value) {
 
   return result.changes > 0;
 }
+// ensure the exclusive transaction about will balance
+async function decreaseWillIfEnough(user_id, price) {
+  const result = await usersDb.run(
+    `
+    UPDATE users
+    SET will_balance = will_balance - ?
+    WHERE user_id = ?
+      AND will_balance >= ?
+    `,
+    [price, user_id, price]
+  );
 
-module.exports = { initDb, findById, update};
+  return result.changes > 0;
+}
+module.exports = { initDb, findById, update, decreaseWillIfEnough};
