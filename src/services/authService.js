@@ -1,5 +1,6 @@
 const userModel = require("../models/userModel");
 const eggModel = require("../models/eggModel");
+const shopItemModel = require("../models/shopItemModel");
 const { getDb } = require("../db");
 
 const bcrypt = require('bcrypt');
@@ -37,7 +38,7 @@ async function registerUser({ email, password, nickname }) {
         }
 
         const egg = await eggModel.create(user.user_id);
-        
+
         // finish adding new information in database
         await db.run("COMMIT");
         isTransactionStarted = false;
@@ -105,13 +106,31 @@ async function getCurrentUser(user_id) {
         throw error;
     }
 
+    const egg = await eggModel.findById(user_id);
+
+    if (!egg) {
+        const error = new Error("Egg not found");
+        error.statusCode = 404;
+        throw error;
+    }
+    const background = egg.active_background_id;
+    const music = egg.active_music_id;
+    const cosmetic = egg.active_cosmetic_id;
+
     return {
-        user_id: user.user_id,
-        email: user.email,
-        nickname: user.nickname,
-        will_balance: user.will_balance,
-        created_at: user.created_at
+        "user": {
+            user_id: user.user_id,
+            email: user.email,
+            nickname: user.nickname,
+            will_balance: user.will_balance,
+            created_at: user.created_at
+        },
+        "egg" : egg,
+        "active_background" : await shopItemModel.findById(background),
+        "active_music": await shopItemModel.findById(music),
+        "active_cosmetic": await shopItemModel.findById(cosmetic)
+
     };
 }
 
-module.exports = { registerUser, loginUser, getCurrentUser};
+module.exports = { registerUser, loginUser, getCurrentUser };
