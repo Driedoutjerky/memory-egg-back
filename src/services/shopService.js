@@ -2,9 +2,11 @@ const shopItemModel = require("../models/shopItemModel");
 const userItemModel = require("../models/userItemModel");
 const userModel = require("../models/userModel");
 
+const {getDb} = require("../db");
+
 // Handles the business logic for purchasing an item
 async function purchaseItem({ user_id, item_id }) {
-  let db = userItemModel.getDb();
+  let db = getDb();
   // check whether transaction has started
   let transactionStarted = false;
   try {
