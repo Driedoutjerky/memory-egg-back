@@ -56,7 +56,7 @@ async function purchase(req, res) {
         const { item_id } = req.body;
 
         // there is no information about user
-        if (!user_id) {
+        if (!user_id || !Number.isInteger(user_id)) {
             return res.status(400).json({ error: "Missing or invalid user id" });
         }
 
