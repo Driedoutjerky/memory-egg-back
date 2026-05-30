@@ -52,11 +52,11 @@ async function purchase(req, res) {
     // after implementing auth, this will be conducted with req.user.user_id
     // const user_id = req.user.user_id;
     try {
-        const user_id = req.params.id;
+        const user_id = Number(req.params.id);
         const { item_id } = req.body;
 
         // there is no information about user
-        if (!user_id || !Number.isInteger(user_id)) {
+        if (user_id === undefined || user_id <=0 || !Number.isInteger(user_id)) {
             return res.status(400).json({ error: "Missing or invalid user id" });
         }
 
