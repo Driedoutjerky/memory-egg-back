@@ -61,7 +61,7 @@ async function purchase(req, res) {
         }
 
         // there is no item_id in body
-        if (item_id === undefined || item_id === null) {
+        if (item_id === undefined || item_id === null || !Number.isInteger(item_id)) {
             return res.status(400).json({ error: "Missing or invalid request body" });
         }
 
