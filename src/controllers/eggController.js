@@ -24,7 +24,8 @@ const eggService = require("../services/eggService");
 // in this case, we will use user_id to find
 async function findById(req, res) {
   try {
-    const user_id = Number(req.params.id);
+    // const user_id = Number(req.params.id);
+    const user_id = Number(req.user.user_id);
     const egg = await eggModel.findById(user_id);
     if (!egg) return res.status(404).json({ error: `Egg of this user is not found` });
     return res.status(200).json(egg);
@@ -38,7 +39,8 @@ async function findById(req, res) {
 // Creates a new egg with req.params.id information
 async function create(req, res) {
   try {
-    const user_id = req.params.id;
+    // const user_id = Number(req.params.id);
+    const user_id = Number(req.user.user_id);
     // Basic validation: required fields must be present.
     // Without this, an INSERT with NULL would fail at the database level
     // because of the NOT NULL constraints we defined in db.js.
@@ -80,7 +82,8 @@ async function remove(req, res) {
 //      - 401 : Unauthorized (this response will be fully implemented after auth implementation)
 //      - 404 : there is an egg owned by user_id, but the item is not found or the user don't have the item
 async function equip(req, res) {
-  const user_id = Number(req.params.id);
+  // const user_id = Number(req.params.id);
+  const user_id = Number(req.user.user_id);
   const item_id = Number(req.body.item_id);
 
   if (
@@ -105,7 +108,8 @@ async function equip(req, res) {
 }
 
 async function unequip(req, res) {
-  const user_id = Number(req.params.id);
+  // const user_id = Number(req.params.id);
+  const user_id = Number(req.user.user_id);
   const item_id = Number(req.body.item_id);
   if (
     !Number.isInteger(user_id) || user_id <= 0 ||
@@ -128,4 +132,4 @@ async function unequip(req, res) {
   }
 }
 
-module.exports = { findById, create, remove, equip, unequip};
+module.exports = { findById, create, remove, equip, unequip };
