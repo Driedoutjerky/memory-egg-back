@@ -79,4 +79,26 @@ async function getCurrentUser(req, res) {
         });
     }
 }
-module.exports = { register, login, getCurrentUser };
+
+async function getInventory(res, req) {
+
+    const user_id = Number(req.user.user_id);
+
+    try {
+        const {userItems, items} = await authService.getInventory(user_id);
+
+        return res.status(200).json({
+            "userItems" : userItems,
+            "items" : items,
+        });
+    } catch (err) {
+        const statusCode = err.statusCode || 500;
+
+        return res.status(statusCode).json({
+            error: statusCode === 500
+                ? "Failed to get current user's inventory"
+                : err.message
+        });
+    }
+}
+module.exports = { register, login, getCurrentUser, getInventory };
