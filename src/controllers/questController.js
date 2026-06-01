@@ -41,7 +41,19 @@ async function getTodaysQuests (req, res){
     }
 }
 
-module.exports = {getTodaysQuests};
+async function claimCompletedQuestReward(req, res){
+    try{
+
+        res.status(201).json("A PLACEHOLDER FOR NOW");
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Database error"});
+    }
+
+}
+
+module.exports = {getTodaysQuests, claimCompletedQuestReward};
 
 
 

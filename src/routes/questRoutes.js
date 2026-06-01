@@ -9,10 +9,12 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/questController");
+const authenticate = require("../middleware/authMiddleware");
 
 // All paths here are RELATIVE to the prefix that was given when this router
 // was mounted in app.js: `app.use("/api/quests", questRouter);`
 
 router.get("/today", controller.getTodaysQuests);
+//router.post("/:id/claim", authenticate, controller.claimCompletedQuestReward);
 
 module.exports = router;
