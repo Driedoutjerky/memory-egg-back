@@ -52,7 +52,8 @@ async function purchase(req, res) {
     // after implementing auth, this will be conducted with req.user.user_id
     // const user_id = req.user.user_id;
     try {
-        const user_id = Number(req.params.id);
+        // const user_id = Number(req.params.id);
+        const user_id = Number(req.user.user_id);
         let { item_id } = req.body;
         item_id = Number(item_id);
         // there is no information about user
