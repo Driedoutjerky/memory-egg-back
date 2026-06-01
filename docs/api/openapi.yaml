@@ -453,7 +453,7 @@ components:
     PurchaseResponse:
       type: object
       properties:
-        userItem:
+        userItems:
           $ref: '#/components/schemas/UserItem'
         item:
           $ref: '#/components/schemas/ShopItem'
@@ -464,9 +464,9 @@ components:
     InventoryItem:
       type: object
       properties:
-        userItem:
+        userItems:
           $ref: '#/components/schemas/UserItem'
-        item:
+        items:
           $ref: '#/components/schemas/ShopItem'
 
     InventoryResponse:
