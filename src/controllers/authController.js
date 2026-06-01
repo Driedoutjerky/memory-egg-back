@@ -80,7 +80,7 @@ async function getCurrentUser(req, res) {
     }
 }
 
-async function getInventory(res, req) {
+async function getInventory(req, res) {
 
     const user_id = Number(req.user.user_id);
 
