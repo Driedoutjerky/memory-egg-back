@@ -360,6 +360,9 @@ components:
     RegisterResponse:
       type: object
       properties:
+        token:
+          type: string
+          example: "JWT_EXAMPLE"
         user:
           $ref: '#/components/schemas/User'
         egg:

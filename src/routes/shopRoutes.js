@@ -18,9 +18,10 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/shopController");
+const {authenticate} = require("../middleware/authMiddleware");
 
 router.get("/items", controller.getAll);
 
 // currently use params for user identification
-router.post("/:id/purchase", controller.purchase);
+router.post("/purchase", authenticate,  controller.purchase);
 module.exports = router;

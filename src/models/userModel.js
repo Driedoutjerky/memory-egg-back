@@ -18,6 +18,8 @@
 
 let usersDb;
 const ALLOWED_USER_FIELDS = new Set(["email", "password_hash", "nickname", "will_balance"]);
+// just for mock data
+const bcrypt = require('bcrypt');
 async function initDb(db) {
   usersDb = db;
 
@@ -42,21 +44,21 @@ async function initDb(db) {
     const userMockData = [
       {
         email: "user1@example.com",
-        password_hash: "mock_password_hash_1",
+        password_hash: await bcrypt.hash("mock_password_hash_1", 10),
         nickname: "MemoryUser1",
         will_balance: 100,
         created_at: now
       },
       {
         email: "user2@example.com",
-        password_hash: "mock_password_hash_2",
+        password_hash: await bcrypt.hash("mock_password_hash_2", 10),
         nickname: "MemoryUser2",
         will_balance: 150,
         created_at: now
       },
       {
         email: "user3@example.com",
-        password_hash: "mock_password_hash_3",
+        password_hash: await bcrypt.hash("mock_password_hash_3", 10),
         nickname: "MemoryUser3",
         will_balance: 200,
         created_at: now
@@ -88,12 +90,53 @@ async function initDb(db) {
   return db;
 }
 
-async function getDb() {
+function getDb() {
   return usersDb;
 }
 
 async function findById(user_id) {
     return await usersDb.get("SELECT * FROM users WHERE user_id = ?", [user_id]);
+}
+
+async function findByEmail(email) {
+  return await usersDb.get(
+    "SELECT * FROM users WHERE email = ?",
+    [email]
+  );
+}
+
+async function create({email, password_hash, nickname, will_balance}){
+
+  const created_at = new Date().toISOString().split("T")[0];
+
+  const result = await usersDb.run(
+    `
+    INSERT INTO users (
+      email,
+      password_hash,
+      nickname,
+      will_balance,
+      created_at
+    ) VALUES (?, ?, ?, ?, ?)
+    `,
+    [
+      email,
+      password_hash,
+      nickname,
+      will_balance,
+      created_at
+    ]
+  );
+
+
+  // password_hash shouldn't be released outside of model
+  return {
+    user_id: result.lastID,
+    email,
+    nickname,
+    will_balance,
+    created_at
+  };
 }
 
 async function update(user_id, key_name, updated_value) {
@@ -112,5 +155,18 @@ async function update(user_id, key_name, updated_value) {
 
   return result.changes > 0;
 }
+// ensure the exclusive transaction about will balance
+async function decreaseWillIfEnough(user_id, price) {
+  const result = await usersDb.run(
+    `
+    UPDATE users
+    SET will_balance = will_balance - ?
+    WHERE user_id = ?
+      AND will_balance >= ?
+    `,
+    [price, user_id, price]
+  );
 
-module.exports = { initDb, findById, update};
+  return result.changes > 0;
+}
+module.exports = { initDb, findById,findByEmail, create, update, decreaseWillIfEnough};
