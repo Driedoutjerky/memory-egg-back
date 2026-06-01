@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel");
 const eggModel = require("../models/eggModel");
 const shopItemModel = require("../models/shopItemModel");
+const userItemModel = require("../models/userItemModel");
 const { getDb } = require("../db");
 
 const bcrypt = require('bcrypt');
@@ -39,6 +40,11 @@ async function registerUser({ email, password, nickname }) {
 
         const egg = await eggModel.create(user.user_id);
 
+        if (!egg) {
+            const error = new Error("Failed to create egg entity");
+            error.statusCode = 500;
+            throw error;
+        }
         // finish adding new information in database
         await db.run("COMMIT");
         isTransactionStarted = false;
@@ -56,7 +62,17 @@ async function registerUser({ email, password, nickname }) {
             await db.run("ROLLBACK");
             isTransactionStarted = false;
         }
-        error.statusCode = 500;
+        // double check for email duplication to prevent simutanious request from a user with same email address
+        if (
+            error.code === "SQLITE_CONSTRAINT" ||
+            error.code === "SQLITE_CONSTRAINT_UNIQUE"
+        ) {
+            error.statusCode = 409;
+            error.message = "Email already registered";
+        } else if (!error.statusCode) {
+            error.statusCode = 500;
+        }
+
         throw error;
     }
 }
@@ -125,12 +141,29 @@ async function getCurrentUser(user_id) {
             will_balance: user.will_balance,
             created_at: user.created_at
         },
-        "egg" : egg,
-        "active_background" : await shopItemModel.findById(background),
+        "egg": egg,
+        "active_background": await shopItemModel.findById(background),
         "active_music": await shopItemModel.findById(music),
         "active_cosmetic": await shopItemModel.findById(cosmetic)
 
     };
 }
 
-module.exports = { registerUser, loginUser, getCurrentUser };
+async function getInventory(user_id) {
+    const userItems = await userItemModel.getAll(user_id);
+    let items = [];
+    userItems.forEach(async (userItem) => {
+        let itemInfo = await shopItemModel.findById(userItem.item_id);
+        if (itemInfo === undefined) {
+            const error = new Error("Item is not found in Inventory");
+            error.statusCode = 404;
+            throw error;
+            return;
+        }
+        items.push(itemInfo);
+    });
+
+    return { userItems, items };
+
+}
+module.exports = { registerUser, loginUser, getCurrentUser, getInventory };

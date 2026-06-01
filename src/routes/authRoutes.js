@@ -26,5 +26,9 @@ router.post("/login", controller.login);
 //   - Returns information about the currently logged-in user.
 //   - This route should be protected by authentication middleware.
 router.get("/me", authenticate, controller.getCurrentUser);
+// GET /api/auth/me/inventory
+//   - Returns information about the current user's items.
+//   - This route should be protected by authentication middleware.
+router.get("/me/inventory", authenticate, controller.getInventory);
 
 module.exports = router;
