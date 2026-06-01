@@ -18,12 +18,15 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/eggController");
+const { authenticate } = require("../middleware/authMiddleware");
 
 // All paths here are RELATIVE to the prefix that was given when this router
 // was mounted in app.js: `app.use("/flights", flightsRouter)`.
 // So `router.get("/")` becomes `GET /flights`, and
 // `router.get("/:id")` becomes `GET /flights/:id`.
 
-// router.patch("/me/egg/equip", controller.equip);             // PATCH /api/me/egg/equip
-
-// module.exports = router;
+// TODO: After implementing auth middleware, we will not add user_id into params or query.
+// currently use params
+router.patch("/equip", authenticate, controller.equip);
+router.patch("/unequip", authenticate, controller.unequip);
+module.exports = router;
