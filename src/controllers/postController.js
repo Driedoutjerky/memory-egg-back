@@ -1,5 +1,6 @@
 
 const postModel = require("../models/postModel");
+const userModel = require("../models/userModel");
 
 async function getAll(req, res){
     try{
@@ -51,6 +52,10 @@ async function create(req, res) {
     // 201 Created is the standard response for a successful resource creation.
     // The body includes the new flight, so the client knows its assigned id.
     res.status(201).json(newPost);
+    
+    // TRANSACTION shizzle implementieren !! -> implement postService.js !! 
+    userModel.increaseWillAfterPost(user_id);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database error" });
