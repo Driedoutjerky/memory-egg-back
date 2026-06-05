@@ -17,7 +17,7 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/postController");
-const authenticate = require("../middleware/authMiddleware");
+const {authenticate} = require("../middleware/authMiddleware");
 
 // All paths here are RELATIVE to the prefix that was given when this router
 // was mounted in app.js: `app.use("/api/posts", postsRouter);`.
