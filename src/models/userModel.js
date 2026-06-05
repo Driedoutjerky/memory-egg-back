@@ -20,6 +20,7 @@ let usersDb;
 const ALLOWED_USER_FIELDS = new Set(["email", "password_hash", "nickname", "will_balance"]);
 // just for mock data
 const bcrypt = require('bcrypt');
+
 async function initDb(db) {
   usersDb = db;
 
@@ -169,4 +170,21 @@ async function decreaseWillIfEnough(user_id, price) {
 
   return result.changes > 0;
 }
-module.exports = { initDb, findById,findByEmail, create, update, decreaseWillIfEnough};
+
+async function increaseWillAfterPost(user_id){
+  
+
+  //const result = await getDb().run("UPDATE users SET will_balance += post.will_reward WHERE user_id = ? JOIN posts ON users.user_id = posts.user_id",[user_id]);
+  const result = await getDb().run(
+    `UPDATE users SET will_balance = will_balance + 
+    (SELECT will_reward FROM posts WHERE posts.user_id = users.user_id) 
+    WHERE users.user_id = ? AND posts.created_at = date('now')`, [user_id]);
+  return result;
+}
+
+
+async function increaseWillAfterQuest(){
+
+}
+
+module.exports = { initDb, findById,findByEmail, create, update, decreaseWillIfEnough, increaseWillAfterPost};
