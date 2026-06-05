@@ -3,12 +3,11 @@ const questModel = require("../models/questModel");
 const userQuestModel = require("../models/userQuestModel");
 const userModel = require("../models/userModel");
 
-// temporarily HARD CODED for TESTING purposes
-//const userId = 2;
-
 
 async function getTodaysQuests (req, res){
     try{
+        // the req.user.user_id is provided by authenticate() from authMiddleware.js
+        // thanks to the endpoint definition in questRoutes.js it has been passed to questController.getTodaysQuests already
         const user_id = req.user.user_id;
         // Splits the Timestamp at letter 'T' and moves the two parts into an array
         // The date-part at index 0 is chosen. E.g. "2026-05-27T12:25:59.143Z" becomes "2026-05-27" 

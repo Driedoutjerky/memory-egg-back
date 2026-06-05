@@ -14,7 +14,7 @@ async function getAll(req, res){
 
 async function getById(req, res){
     try{
-         const post_id = Number(req.params.id);
+        const post_id = Number(req.params.id);
         const post = await postModel.findById(post_id);
         if(!post) return res.status(404).json({error: "Post not found"});
         return res.status(200).json(post);
