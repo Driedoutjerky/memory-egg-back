@@ -12,7 +12,7 @@ async function getTodaysQuests (req, res){
         // Splits the Timestamp at letter 'T' and moves the two parts into an array
         // The date-part at index 0 is chosen. E.g. "2026-05-27T12:25:59.143Z" becomes "2026-05-27" 
         const today = new Date().toISOString().split('T')[0]; 
-        const questIdTodaysQuests = await userQuestModel.getIdOfTodaysQuests(today, userId);
+        const questIdTodaysQuests = await userQuestModel.getIdOfTodaysQuests(today, user_id);
         
         // if no result: return empty array
         if (!questIdTodaysQuests || questIdTodaysQuests.length === 0){

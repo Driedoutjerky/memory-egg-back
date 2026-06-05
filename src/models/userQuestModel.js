@@ -133,4 +133,38 @@ async function getIdOfTodaysQuests(date, userId) {
     return result;
 }
 
-module.exports = { initDb, getIdOfTodaysQuests };
+async function increaseWillAfterQuest(user_quest_id, user_id){
+  
+    // 1. is this quest in the current user's quest?
+    const questIfCurrentUser = await getDb.get(
+        "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
+    );
+
+    // 2. is it actually done? & Is it already claimed?
+    const status = questIfCurrentUser.status;
+    console.log(status);
+
+    // 3. load will_balance_of_user from user table
+    if (!status === "Completed but unclaimed"){
+        return false;
+    }
+
+    const will_balance_of_user = await getDb.get("SELECT will_balance_of_user FROM users WHERE user_id = ?", [user_id]);
+    const reward_will = await getDb.get("SELECT reward_will FROM quests INNER JOIN quests.quest_id = user_quests.quest_id");
+
+    // 4. increase will_balance_of_user by its will_reward
+    will_balance_of_user += reward_will;
+    await getDb.run("UPDATE users SET will_balance_of_user = ? WHERE user_id = ?", [will_balance_of_user, user_id]);
+
+    // 5. Update User Quest with is_completed as true
+    await getDb.run("UPDATE user_quests SET status = 'Claimed' WHERE user_quest_id = ?", [user_quest_id]);
+
+    // return Completed Quest Info and will_balance
+    return will_balance_of_user;
+
+
+}
+
+
+
+module.exports = { initDb, getIdOfTodaysQuests, increaseWillAfterQuest};
