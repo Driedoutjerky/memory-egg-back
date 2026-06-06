@@ -131,15 +131,16 @@ function getDb() {
   return postsDb;
 }
 
-async function getAll(){
-    const sql = "SELECT * FROM posts";
-    return getDb().all(sql);
+async function getAll(user_id){
+    const sql = "SELECT * FROM posts WHERE user_id = ?";
+    return getDb().all(sql, [user_id]);
 }
 
 // Returns a single post by id, or undefined if no row matches.
 // db.get returns the first matching row, or undefined if there is none.
-async function findById(post_id) {
-  return getDb().get("SELECT * FROM posts WHERE post_id = ?", [post_id]);
+async function findById(post_id, user_id) {
+  const sql = "SELECT * FROM posts WHERE post_id = ?";// AND user_id = ?";
+  return getDb().get(sql, [post_id]);
 }
 
 // Inserts a new post and returns it including its generated id.
