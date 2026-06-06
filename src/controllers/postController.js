@@ -6,6 +6,7 @@ async function getAll(req, res){
     try{
         const user_id = Number(req.user.user_id);
         const posts = await postModel.getAll(user_id);
+        if(!posts || posts.length === 0) return res.status(404).json("no Posts found");
         res.status(200).json(posts);
     } catch (err){
         console.error(err);
