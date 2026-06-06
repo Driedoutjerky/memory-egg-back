@@ -136,7 +136,7 @@ async function getIdOfTodaysQuests(date, userId) {
 async function increaseWillAfterQuest(user_quest_id, user_id){
   
     // 1. is this quest in the current user's quest?
-    const questIfCurrentUser = await getDb.get(
+    const questIfCurrentUser = await getDb().get(
         "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
     );
 
@@ -153,15 +153,15 @@ async function increaseWillAfterQuest(user_quest_id, user_id){
         throw new Error("Quest status is not 'Completed but unclaimed'");
     }
 
-    const will_balance_of_user = await getDb.get("SELECT will_balance_of_user FROM users WHERE user_id = ?", [user_id]);
-    const reward_will = await getDb.get("SELECT reward_will FROM quests INNER JOIN quests.quest_id = user_quests.quest_id");
+    const will_balance_of_user = await getDb().get("SELECT will_balance_of_user FROM users WHERE user_id = ?", [user_id]);
+    const reward_will = await getDb().get("SELECT reward_will FROM quests INNER JOIN quests.quest_id = user_quests.quest_id");
 
     // 4. increase will_balance_of_user by its will_reward
     will_balance_of_user += reward_will;
-    await getDb.run("UPDATE users SET will_balance_of_user = ? WHERE user_id = ?", [will_balance_of_user, user_id]);
+    await getDb().run("UPDATE users SET will_balance_of_user = ? WHERE user_id = ?", [will_balance_of_user, user_id]);
 
     // 5. Update User Quest with is_completed as true
-    await getDb.run("UPDATE user_quests SET status = 'Claimed' WHERE user_quest_id = ?", [user_quest_id]);
+    await getDb().run("UPDATE user_quests SET status = 'Claimed' WHERE user_quest_id = ?", [user_quest_id]);
 
     // return Completed Quest Info and will_balance
     return {row : questIfCurrentUser, will_balance_of_user : will_balance_of_user}
