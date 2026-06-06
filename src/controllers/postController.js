@@ -4,7 +4,8 @@ const userModel = require("../models/userModel");
 
 async function getAll(req, res){
     try{
-        const posts = await postModel.getAll();
+        const user_id = Number(req.user.user_id);
+        const posts = await postModel.getAll(user_id);
         res.status(200).json(posts);
     } catch (err){
         console.error(err);
@@ -14,8 +15,9 @@ async function getAll(req, res){
 
 async function getById(req, res){
     try{
+        const user_id = Number(req.user.user_id);
         const post_id = Number(req.params.id);
-        const post = await postModel.findById(post_id);
+        const post = await postModel.findById(post_id, user_id);
         if(!post) return res.status(404).json({error: "Post not found"});
         return res.status(200).json(post);
     } catch (err) {
@@ -42,7 +44,7 @@ async function create(req, res) {
     !tag ||
     !visibility ||
     //word_count === undefined ||
-    will_reward === undefined ||
+    // will_reward === undefined ||
     created_at == null ||
     updated_at == null
     ) {
@@ -51,10 +53,12 @@ async function create(req, res) {
     const countTheWords = (str) => {return str.trim() .split(/\s+/).length;}
     const wordCount = countTheWords(content);
 
+    const calculatedWillReward = Math.round(wordCount / 10);
+
     // TRANSACTION shizzle implementieren !! -> implement postService.js !! 
-    const newPost = await postModel.create({ user_id, title, content, image_url, tag, visibility, word_count: wordCount, will_reward, created_at, updated_at });    
+    const newPost = await postModel.create({ user_id, title, content, image_url, tag, visibility, word_count: wordCount, will_reward: calculatedWillReward, created_at, updated_at });    
     
-    // userModel.increaseWillAfterPost(user_id); 
+    userModel.increaseWillAfterPost(calculatedWillReward, user_id); 
     
     res.status(201).json(newPost);
   } catch (err) {
