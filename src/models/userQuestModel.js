@@ -177,7 +177,7 @@ async function increaseWillAfterQuest(user_quest_id, user_id){
     await getDb().run("UPDATE user_quests SET status = 'Claimed' WHERE user_quest_id = ?", [user_quest_id]);
 
     // return Completed Quest Info and will_balance
-    return {row : questIfCurrentUser, will_balance_of_user : will_balance_of_user}
+    return {questIfCurrentUser : questIfCurrentUser, will_balance_of_user : will_balance_of_user}
 }
 
 

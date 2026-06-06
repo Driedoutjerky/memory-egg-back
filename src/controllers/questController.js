@@ -47,7 +47,7 @@ async function claimCompletedQuestReward(req, res){
         const user_quest_id = Number(req.params.id);
         const outcomeOfClaimedQuestReward = await userQuestModel.increaseWillAfterQuest(user_quest_id, user_id);
 
-        res.status(201).json(`A PLACEHODER JUST FOR NOW WITH user_id = ${user_id}`);
+        res.status(201).json(outcomeOfClaimedQuestReward);
 
     } catch (err) {
         console.error(err);
