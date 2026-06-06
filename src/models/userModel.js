@@ -171,17 +171,12 @@ async function decreaseWillIfEnough(user_id, price) {
   return result.changes > 0;
 }
 
-// CAN MOST LIKELY BE DELETED IN THE FUTURE
-// async function increaseWillAfterPost(user_id){
+
+async function increaseWillAfterPost(calculatedWillReward, user_id){
   
+  const result = await getDb().run(
+  `UPDATE users SET will_balance = will_balance + ? WHERE user_id = ?`,
+  [calculatedWillReward, user_id]);
+  }
 
-//   //const result = await getDb().run("UPDATE users SET will_balance += post.will_reward WHERE user_id = ? JOIN posts ON users.user_id = posts.user_id",[user_id]);
-//   const result = await getDb().run(
-//     `UPDATE users SET will_balance = will_balance + 
-//     (SELECT will_reward FROM posts WHERE posts.user_id = users.user_id) 
-//     WHERE users.user_id = ? AND posts.created_at = date('now')`, [user_id]);
-//   return result;
-// }
-
-
-module.exports = { initDb, findById,findByEmail, create, update, decreaseWillIfEnough};
+module.exports = { initDb, findById,findByEmail, create, update, decreaseWillIfEnough, increaseWillAfterPost};
