@@ -154,18 +154,23 @@ async function increaseWillAfterQuest(user_quest_id, user_id){
 
     // 2. is it actually done? & Is it already claimed?
     const status = questIfCurrentUser.status;
-    console.log(`the status is: ${status}`);
 
     // 3. load will_balance_of_user from user table
     if (status !== "Completed but unclaimed"){
         throw new Error("Quest status is not 'Completed but unclaimed'");
     }
 
-    let will_balance_of_user = await getDb().get("SELECT will_balance FROM users WHERE user_id = ?", [user_id]);
-    const reward_will = await getDb().get("SELECT reward_will FROM quests INNER JOIN user_quests ON quests.quest_id = user_quests.quest_id;");
+    const will_balance_of_user_Object = await getDb().get("SELECT will_balance FROM users WHERE user_id = ?", [user_id]);
+    let will_balance_of_user = will_balance_of_user_Object.will_balance;
+    
 
+    const reward_will_Object = await getDb().get("SELECT reward_will FROM quests INNER JOIN user_quests ON quests.quest_id = user_quests.quest_id;");
+    const reward_will = reward_will_Object.reward_will;
+    
     // 4. increase will_balance_of_user by its will_reward
     will_balance_of_user += reward_will;
+    
+    
     await getDb().run("UPDATE users SET will_balance = ? WHERE user_id = ?", [will_balance_of_user, user_id]);
 
     // 5. Update User Quest with is_completed as true
