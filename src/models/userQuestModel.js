@@ -140,13 +140,17 @@ async function increaseWillAfterQuest(user_quest_id, user_id){
         "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
     );
 
+    if (!questIfCurrentUser){
+        throw new Error("Quest not found or does not belong to the user with user_id: " + user_id);
+    }
+
     // 2. is it actually done? & Is it already claimed?
     const status = questIfCurrentUser.status;
     console.log(status);
 
     // 3. load will_balance_of_user from user table
     if (!status === "Completed but unclaimed"){
-        return false;
+        throw new Error("Quest status is not 'Completed but unclaimed'");
     }
 
     const will_balance_of_user = await getDb.get("SELECT will_balance_of_user FROM users WHERE user_id = ?", [user_id]);
@@ -160,9 +164,7 @@ async function increaseWillAfterQuest(user_quest_id, user_id){
     await getDb.run("UPDATE user_quests SET status = 'Claimed' WHERE user_quest_id = ?", [user_quest_id]);
 
     // return Completed Quest Info and will_balance
-    return will_balance_of_user;
-
-
+    return {row : questIfCurrentUser, will_balance_of_user : will_balance_of_user}
 }
 
 
