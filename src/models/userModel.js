@@ -184,4 +184,4 @@ async function decreaseWillIfEnough(user_id, price) {
 // }
 
 
-module.exports = { initDb, findById,findByEmail, create, update, decreaseWillIfEnough, increaseWillAfterPost, increaseWillAfterQuest};
+module.exports = { initDb, findById,findByEmail, create, update, decreaseWillIfEnough};
