@@ -1,7 +1,6 @@
 
 const questModel = require("../models/questModel");
 const userQuestModel = require("../models/userQuestModel");
-const userModel = require("../models/userModel");
 
 
 async function getTodaysQuests (req, res){
@@ -44,13 +43,15 @@ async function getTodaysQuests (req, res){
 
 async function claimCompletedQuestReward(req, res){
     try{
-        const user_id = Number(req.params.id);
+        const user_id = Number(req.user.user_id);
+        const user_quest_id = Number(req.params.id);
+        const outcomeOfClaimedQuestReward = await userQuestModel.increaseWillAfterQuest(user_quest_id, user_id);
 
         res.status(201).json(`A PLACEHODER JUST FOR NOW WITH user_id = ${user_id}`);
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({error: "Database error"});
+        res.status(500).json({error: err.message});
     }
 
 }
