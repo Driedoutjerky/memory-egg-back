@@ -73,9 +73,10 @@ async function create(req, res) {
 // We use that to distinguish 204 (deleted) from 404 (no such flight).
 async function remove(req, res) {
   try {
+    const user_id = Number(req.user.user_id);
     const post_id = Number(req.params.id);
-    const removed = await postModel.remove(post_id);
-    if (!removed) return res.status(404).json({ error: "Post not found" });
+    const removed = await postModel.remove(post_id, user_id);
+    if (!removed) return res.status(404).json({ error: "Post not found or unauthorized to delete this post" });
     // 204 No Content: the request succeeded and there is nothing to return.
     res.status(204).send();
   } catch (err) {

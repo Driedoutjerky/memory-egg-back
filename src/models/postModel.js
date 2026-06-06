@@ -139,8 +139,8 @@ async function getAll(user_id){
 // Returns a single post by id, or undefined if no row matches.
 // db.get returns the first matching row, or undefined if there is none.
 async function findById(post_id, user_id) {
-  const sql = "SELECT * FROM posts WHERE post_id = ?";// AND user_id = ?";
-  return getDb().get(sql, [post_id]);
+  const sql = "SELECT * FROM posts WHERE post_id = ? AND user_id = ?";
+  return getDb().get(sql, [post_id, user_id]);
 }
 
 // Inserts a new post and returns it including its generated id.
@@ -161,8 +161,8 @@ async function create({ user_id, title, content, image_url, tag, visibility, wor
 // The controller uses this boolean to decide between:
 //   - 204 No Content (deleted successfully)
 //   - 404 Not Found  (no post with that id existed)
-async function remove(post_id) {
-  const result = await getDb().run("DELETE FROM posts WHERE post_id = ?", [post_id]);
+async function remove(post_id, user_id) {
+  const result = await getDb().run("DELETE FROM posts WHERE post_id = ? AND user_id = ?", [post_id, user_id]);
   return result.changes > 0;
 }
 
