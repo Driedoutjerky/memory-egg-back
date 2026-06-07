@@ -45,13 +45,14 @@ async function claimCompletedQuestReward(req, res){
     try{
         const user_id = Number(req.user.user_id);
         const user_quest_id = Number(req.params.id);
+        if(!user_quest_id) {res.status(400).json("Missing valid path parameter for 'user_quest_id'")};
         const outcomeOfClaimedQuestReward = await userQuestModel.increaseWillAfterQuest(user_quest_id, user_id);
 
         res.status(201).json(outcomeOfClaimedQuestReward);
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({error: err.message});
+        res.status(err.statusCode || 500).json({error: err.message});
     }
 
 }
