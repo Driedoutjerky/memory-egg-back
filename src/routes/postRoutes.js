@@ -17,14 +17,15 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/postController");
+const {authenticate} = require("../middleware/authMiddleware");
 
 // All paths here are RELATIVE to the prefix that was given when this router
 // was mounted in app.js: `app.use("/api/posts", postsRouter);`.
 
 
-router.get("/all", controller.getAll);                          
-router.get("/:id", controller.getById);                      
-router.post("/", controller.create);                         
-router.delete("/:id", controller.remove);            
+router.get("/all", authenticate, controller.getAll);                          
+router.get("/:id", authenticate, controller.getById);                      
+router.post("/", authenticate, controller.create);                         
+router.delete("/:id", authenticate, controller.remove);            
 
 module.exports = router;

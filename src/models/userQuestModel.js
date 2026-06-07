@@ -91,6 +91,14 @@ async function initDb(db) {
                 status: "assigned",
                 completed_post_id: null,
                 completed_at: null
+            },
+            {
+                user_id: 4,
+                quest_id: 2,
+                assigned_date: now,
+                status: "completed",
+                completed_post_id: null,
+                completed_at: null
             }
         ];
 
@@ -133,4 +141,60 @@ async function getIdOfTodaysQuests(date, userId) {
     return result;
 }
 
-module.exports = { initDb, getIdOfTodaysQuests };
+async function increaseWillAfterQuest(user_quest_id, user_id){
+  
+    const doesQuestExist = await getDb().get(
+        "SELECT * FROM user_quests WHERE user_quest_id = ?", [user_quest_id]
+    );
+
+    if(!doesQuestExist){
+        const error = new Error("Quest not found");
+        error.statusCode = 404;
+        throw error;
+        
+    }
+
+    // 1. is this quest in the current user's quest?
+    const questIfCurrentUser = await getDb().get(
+        "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
+    );
+
+    if (!questIfCurrentUser){
+        const error = new Error("Forbidden! Quest does not belong to the user with user_id: " + user_id);
+        error.statusCode = 403;
+        throw error;
+    }
+
+    // 2. is it actually done? & Is it already claimed?
+    const status = questIfCurrentUser.status;
+
+    // 3. load will_balance_of_user from user table
+    if (status !== "completed"){
+        const error = new Error("Quest status is not 'completed'");
+        error.statusCode = 403;
+        throw error;
+    }
+
+    const will_balance_of_user_Object = await getDb().get("SELECT will_balance FROM users WHERE user_id = ?", [user_id]);
+    let will_balance_of_user = will_balance_of_user_Object.will_balance;
+    
+
+    const reward_will_Object = await getDb().get("SELECT reward_will FROM quests INNER JOIN user_quests ON quests.quest_id = user_quests.quest_id;");
+    const reward_will = reward_will_Object.reward_will;
+    
+    // 4. increase will_balance_of_user by its will_reward
+    will_balance_of_user += reward_will;
+    
+    
+    await getDb().run("UPDATE users SET will_balance = ? WHERE user_id = ?", [will_balance_of_user, user_id]);
+
+    // 5. Update User Quest with is_completed as true
+    await getDb().run("UPDATE user_quests SET status = 'claimed' WHERE user_quest_id = ?", [user_quest_id]);
+
+    // return Completed Quest Info and will_balance
+    return {questIfCurrentUser : questIfCurrentUser, will_balance_of_user : will_balance_of_user}
+}
+
+
+
+module.exports = { initDb, getIdOfTodaysQuests, increaseWillAfterQuest};
