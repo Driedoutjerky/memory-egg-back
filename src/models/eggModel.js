@@ -64,7 +64,7 @@ async function initDb(db){
         weight: 12,
         active_background_id: 1,
         active_music_id: null,
-        active_cosmetic_id: 2,
+        active_cosmetic_id: 8,
         updated_at: new Date().toISOString().split('T')[0]
       },
       {
@@ -74,8 +74,8 @@ async function initDb(db){
         warmth: 65,
         weight: 25,
         active_background_id: 2,
-        active_music_id: 1,
-        active_cosmetic_id: 3,
+        active_music_id: 5,
+        active_cosmetic_id: 11,
         updated_at: new Date().toISOString().split('T')[0]
       }
     ];

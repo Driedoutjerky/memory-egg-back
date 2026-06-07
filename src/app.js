@@ -14,6 +14,7 @@
 // =============================================================================
 
 const express = require("express");
+const path = require("path");
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const cors = require("cors"); //Cross_origin Resource Sharing. Allows frontend to call backend on localhost with different ports.
@@ -50,6 +51,7 @@ app.get("/api/health", (req, res) => { //Endpoint route used to check the backen
 });
 
 app.use(express.static("public"));
+app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 app.use("/api/auth", authRouter);
 app.use("/api/egg", eggRouter);
