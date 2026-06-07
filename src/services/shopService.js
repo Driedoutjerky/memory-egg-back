@@ -68,10 +68,9 @@ async function purchaseItem({ user_id, item_id }) {
     transactionStarted = false;
 
     return {
-      user_id,
-      item_id,
-      item_name: item.name,
-      price: item.price
+      "userItems" : await userItemModel.findByIds(user_id, item_id),
+      "item" : item,
+      "willBalance": user.will_balance
     };
   }
   catch (error) {
