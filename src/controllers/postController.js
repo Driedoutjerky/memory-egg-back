@@ -6,11 +6,11 @@ async function getAll(req, res){
     try{
         const user_id = Number(req.user.user_id);
         const posts = await postModel.getAll(user_id);
-        if(!posts || posts.length === 0) return res.status(404).json("no Posts found");
+        //if(!posts || posts.length === 0) return res.status(404).json("no Posts found");
         res.status(200).json(posts);
     } catch (err){
         console.error(err);
-        res.status(500).json({ error: "Database error" });
+        res.status(err.statusCode || 500).json({error: err.message});
     }
 }
 
@@ -19,11 +19,11 @@ async function getById(req, res){
         const user_id = Number(req.user.user_id);
         const post_id = Number(req.params.id);
         const post = await postModel.findById(post_id, user_id);
-        if(!post) return res.status(404).json({error: "Post not found"});
+        //if(!post) return res.status(404).json({error: "Post not found"});
         return res.status(200).json(post);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Database error" });
+        res.status(err.statusCode || 500).json({error: err.message});
     }
 }
 
@@ -77,12 +77,12 @@ async function remove(req, res) {
     const user_id = Number(req.user.user_id);
     const post_id = Number(req.params.id);
     const removed = await postModel.remove(post_id, user_id);
-    if (!removed) return res.status(404).json({ error: "Post not found or unauthorized to delete this post" });
+    //if (!removed) return res.status(404).json({ error: "Post not found or unauthorized to delete this post" });
     // 204 No Content: the request succeeded and there is nothing to return.
     res.status(204).send();
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Database error" });
+    res.status(err.statusCode || 500).json({error: err.message});
   }
 }
 

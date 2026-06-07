@@ -133,14 +133,36 @@ function getDb() {
 
 async function getAll(user_id){
     const sql = "SELECT * FROM posts WHERE user_id = ?";
-    return getDb().all(sql, [user_id]);
+    const result = await getDb().all(sql, [user_id]);
+    
+    if(!result || result.length === 0){
+      const error = new Error (`no posts from user ${user_id} in database`);
+      error.statusCode = 404;
+      throw error;
+    }
+    return result
 }
 
 // Returns a single post by id, or undefined if no row matches.
 // db.get returns the first matching row, or undefined if there is none.
 async function findById(post_id, user_id) {
   const sql = "SELECT * FROM posts WHERE post_id = ? AND user_id = ?";
-  return getDb().get(sql, [post_id, user_id]);
+  const checkIfPostPresent = await getDb().get("SELECT * FROM posts WHERE post_id = ?", [post_id]);
+
+  if(!checkIfPostPresent){
+    const error = new Error(`post with id ${post_id} not found`);
+    error.statusCode = 404;
+    throw error;
+  }
+  const result = await getDb().get(sql, [post_id, user_id]);
+
+  if(!result){
+    const error = new Error(`Forbidden! Missing authorisation to see post with id ${post_id}`);
+    error.statusCode = 403;
+    throw error;
+  }
+
+  return result;
 }
 
 // Inserts a new post and returns it including its generated id.
@@ -162,8 +184,26 @@ async function create({ user_id, title, content, image_url, tag, visibility, wor
 //   - 204 No Content (deleted successfully)
 //   - 404 Not Found  (no post with that id existed)
 async function remove(post_id, user_id) {
+
+  const checkIfPostPresent = await getDb().get("SELECT * FROM posts WHERE post_id = ?", [post_id]);
+
+  if(!checkIfPostPresent){
+    const error = new Error(`post with id ${post_id} not found`);
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const checkIfAuthorized = await getDb().get("SELECT * FROM posts WHERE post_id = ? AND user_id = ?", [post_id, user_id]);
+
+  if(!checkIfAuthorized){
+    const error = new Error(`Forbidden! User ${user_id} doesn't have the required priviledges to delete post with id ${post_id}`);
+    error.statusCode = 403;
+    throw error;
+  }
   const result = await getDb().run("DELETE FROM posts WHERE post_id = ? AND user_id = ?", [post_id, user_id]);
-  return result.changes > 0;
+
+  return result;
+  //return result.changes > 0;
 }
 
 module.exports = {initDb, getAll, findById, create, remove };
