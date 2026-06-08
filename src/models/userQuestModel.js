@@ -175,6 +175,13 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
         "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
     );
 
+    
+    if (!questIfCurrentUser){
+        const error = new Error("Forbidden! Quest " + user_quest_id + "does not belong to the user with user_id: " + user_id);
+        error.statusCode = 403;
+        throw error;
+    }
+
     if (questIfCurrentUser.status === "claimed") {
     const error = new Error(
         `Quest ${user_quest_id} has already been claimed`
@@ -182,12 +189,6 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
     error.statusCode = 409;
     throw error;
 }
-
-    if (!questIfCurrentUser){
-        const error = new Error("Forbidden! Quest " + user_quest_id + "does not belong to the user with user_id: " + user_id);
-        error.statusCode = 403;
-        throw error;
-    }
 
     // 1b) are quest completition conditions met ? 
     const quest_template_Object = await getDb().get(
@@ -223,12 +224,13 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
     //     throw error;
     // }
 
-    // completion conditions NOT met ?    
     // if(quest_type === "post_tag" && required_tag !== tag_type_post.tag){
-    //     const error = new Error(`wrong tag for userQuest ${user_quest_id}`);
-    //     error.statusCode = 400;
-    //     throw error;
-    // }
+        //     const error = new Error(`wrong tag for userQuest ${user_quest_id}`);
+        //     error.statusCode = 400;
+        //     throw error;
+        // }
+    
+    // completion conditions NOT met ?    
     if (quest_type === "post_tag") {
         if (tag_type_post === undefined) {
             const error = new Error(
@@ -341,29 +343,30 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
 
     }
 
-    // 1c) update "user_quests" as completed, set completed_post_id and completed_at
-    await getDb().run(
-        // completed_post_id = ?,
-  `UPDATE user_quests
-   SET status = 'completed',
-       completed_at = ?
-   WHERE user_quest_id = ?`,
-  [new Date().toISOString(), user_quest_id]
-);
+//     // 1c) update "user_quests" as completed, set completed_post_id and completed_at
+//     await getDb().run(
+//         // completed_post_id = ?,
+//   `UPDATE user_quests
+//    SET status = 'completed',
+//        completed_at = ?
+//    WHERE user_quest_id = ?
+//     AND status = 'assigned'`,
+//   [new Date().toISOString(), user_quest_id]
+// );
 
-    // 2. is it actually done? & Is it already claimed?
-        //Update Variable:
-    questIfCurrentUser = await getDb().get(
-        "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
-    );
-    const status = questIfCurrentUser.status;
+//     // 2. is it actually done? & Is it already claimed?
+//         //Update Variable:
+//     questIfCurrentUser = await getDb().get(
+//         "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
+//     );
+//     const status = questIfCurrentUser.status;
 
-    // 3. load will_balance_of_user from user table
-    if (status !== "completed"){
-        const error = new Error("Quest status is not 'completed'");
-        error.statusCode = 403;
-        throw error;
-    }
+//     // 3. load will_balance_of_user from user table
+//     if (status !== "completed"){
+//         const error = new Error("Quest status is not 'completed'");
+//         error.statusCode = 403;
+//         throw error;
+//     }
 
     const will_balance_of_user_Object = await getDb().get("SELECT will_balance FROM users WHERE user_id = ?", [user_id]);
     let will_balance_of_user = will_balance_of_user_Object.will_balance;
@@ -379,7 +382,7 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
     await getDb().run("UPDATE users SET will_balance = ? WHERE user_id = ?", [will_balance_of_user, user_id]);
 
     // 5. Update User Quest with is_completed as true
-    await getDb().run("UPDATE user_quests SET status = 'claimed' WHERE user_quest_id = ?", [user_quest_id]);
+    await getDb().run("UPDATE user_quests SET status = 'claimed', completed_at = ? WHERE user_quest_id = ?", [new Date().toISOString(), user_quest_id]);
     
     //Update Variable:
     questIfCurrentUser = await getDb().get(
