@@ -3,6 +3,11 @@
 jest.mock("../../models/eggModel");
 jest.mock("../../models/shopItemModel");
 jest.mock("../../models/userItemModel");
+jest.mock("../../db", () => ({
+  getDb: () => ({
+    run: jest.fn().mockResolvedValue({})
+  })
+}));
 
 const eggService = require("../../services/eggService");
 const eggModel = require("../../models/eggModel");
