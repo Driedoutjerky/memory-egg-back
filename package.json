@@ -31,6 +31,9 @@
   "author": "",
   "license": "Apache-2.0",
   "type": "commonjs",
+  "engines": {
+    "node": ">=20.0.0 <22.0.0"
+  },
   "bugs": {
     "url": "https://github.com/Driedoutjerky/memory-egg-back/issues"
   },
