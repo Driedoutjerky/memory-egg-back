@@ -39,7 +39,7 @@ async function getAll(req, res) {
         if(!items) {
             return res.status(404).json({error: "Shop Items not found"});
         }
-        return res.status(200).json(items);
+        return res.status(200).json({"items": items});
     }
     catch(err){
         res.status(500).json({ error: `Database error : ${err}`});
