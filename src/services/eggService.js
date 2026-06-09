@@ -37,7 +37,7 @@ async function equip({ user_id, item_id }) {
     let prior = egg[`active_${itemType}_id`];
 
     // if there is an item which is already equipped, unequip
-    if (prior != null && prior !== item_id) {
+    if (prior != null && prior != item_id) {
         let priorInventory = await userItemModel.findByIds(user_id, prior);
 
         if (priorInventory) {
@@ -45,10 +45,12 @@ async function equip({ user_id, item_id }) {
             await userItemModel.update(priorInventory);
         }
     }
-
+    if (prior != item_id){
+        applyItemEffect(egg, await shopItemModel.findById(prior), 0);
+        applyItemEffect(egg, item, 1);
+    }
     egg[`active_${itemType}_id`] = itemInventory.item_id;
     itemInventory.is_equipped = 1;
-
     // equip item
     let flagEgg = await eggModel.update(egg);
     let flagUserItem = await userItemModel.update(itemInventory);
@@ -112,8 +114,8 @@ async function unequip({ user_id, item_id }) {
 
     egg[`active_${itemType}_id`] = null;
     itemInventory.is_equipped = 0;
-
-    // equip item
+    // unequip item
+    applyItemEffect(egg, item, 1);
     let flagEgg = await eggModel.update(egg);
     let flagUserItem = await userItemModel.update(itemInventory);
 
@@ -126,6 +128,16 @@ async function unequip({ user_id, item_id }) {
         throw error;
     }
 
+}
+function applyItemEffect(egg, item, is_euip){
+    let itemEffectType = item["effect_type"];
+    let itemEffectValue = Number(item["effect_value"]);
+    if(is_euip){
+        egg[itemEffectType] += itemEffectValue;
+    } else {
+        egg[itemEffectType] -= itemEffectValue;
+    }
+    return egg;
 }
 
 module.exports = { equip, unequip };

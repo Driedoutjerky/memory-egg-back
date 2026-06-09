@@ -152,7 +152,9 @@ async function getCurrentUser(user_id) {
 async function getInventory(user_id) {
     const userItems = await userItemModel.getAll(user_id);
     let items = [];
-    userItems.forEach(async (userItem) => {
+    let userItem;
+    for(let i = 0; i < userItems.length; i++){
+        userItem = userItems[i];
         let itemInfo = await shopItemModel.findById(userItem.item_id);
         if (itemInfo === undefined) {
             const error = new Error("Item is not found in Inventory");
@@ -161,8 +163,7 @@ async function getInventory(user_id) {
             return;
         }
         items.push(itemInfo);
-    });
-
+    }
     return { userItems, items };
 
 }
