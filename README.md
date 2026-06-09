@@ -4,9 +4,6 @@
 <a href="https://github.com/Driedoutjerky/memory-egg-back/actions/workflows/backend-ci.yml"> 
   <img src="https://github.com/Driedoutjerky/memory-egg-back/actions/workflows/backend-ci.yml/badge.svg" alt="CI" /> 
 </a> 
-<a href="https://github.com/Driedoutjerky/memory-egg-back/stargazers"> 
-  <img src="https://img.shields.io/github/stars/Driedoutjerky/memory-egg-back?style=flat-square" alt="GitHub stars" /> 
-</a> 
 <a href="https://memory-egg-back.onrender.com/api-docs"> 
   <img src="https://img.shields.io/badge/API%20Docs-Swagger-85EA2D?style=flat-square&logo=swagger&logoColor=black" alt="API Docs" />
 </a> 
