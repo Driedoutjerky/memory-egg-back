@@ -1,6 +1,7 @@
 
 const questModel = require("../models/questModel");
 const userQuestModel = require("../models/userQuestModel");
+const postModel = require("../models/postModel");
 
 
 async function getTodaysQuests (req, res){
@@ -46,7 +47,8 @@ async function claimCompletedQuestReward(req, res){
         const user_id = Number(req.user.user_id);
         const user_quest_id = Number(req.params.id);
         if(!user_quest_id) {res.status(400).json("Missing valid path parameter for 'user_quest_id'")};
-        const outcomeOfClaimedQuestReward = await userQuestModel.increaseWillAfterQuest(user_quest_id, user_id);
+        const getAllPostsOfUser = await postModel.getAll(user_id);
+        const outcomeOfClaimedQuestReward = await userQuestModel.increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser);
 
         res.status(201).json(outcomeOfClaimedQuestReward);
 
