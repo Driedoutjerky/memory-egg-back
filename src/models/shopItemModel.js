@@ -47,17 +47,7 @@ async function initDb(db) {
     if (shopItemsCount.count === 0) {
         const shopItemMockData = [
             {
-                name: "default",
-                item_type: "background",
-                description: "The original quiet background for a calm memory egg.",
-                price: 0,
-                effect_type: "warmth",
-                effect_value: "1",
-                asset_url: null,
-                is_active: 1
-            },
-            {
-                name: "fall_bg",
+                name: "Crisp Autumn Background",
                 item_type: "background",
                 description: "A crisp autumn background with falling leaves and soft amber light.",
                 price: 150,
@@ -67,7 +57,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "grass_bg",
+                name: "Green Field Background",
                 item_type: "background",
                 description: "A fresh green field background that makes the egg feel light and peaceful.",
                 price: 140,
@@ -77,7 +67,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "nightstreet_bg",
+                name: "Night Street Background",
                 item_type: "background",
                 description: "A quiet night street background lit by city lamps and reflections.",
                 price: 180,
@@ -87,7 +77,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "eternity_in_moments",
+                name: "Eternity In Moments Music",
                 item_type: "music",
                 description: "A gentle track that stretches small memories into something lasting.",
                 price: 160,
@@ -97,7 +87,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "gold_phenomenon",
+                name: "Gold Phenomenon Music",
                 item_type: "music",
                 description: "A bright, shimmering track that gives the egg a golden pulse.",
                 price: 170,
@@ -107,7 +97,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "mi_querido",
+                name: "Mi Querido Music",
                 item_type: "music",
                 description: "A warm melodic track with a tender and familiar mood.",
                 price: 170,
@@ -117,7 +107,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "angelic",
+                name: "Angelic",
                 item_type: "cosmetic",
                 description: "A soft halo effect that gives the egg a serene angelic glow.",
                 price: 220,
@@ -127,7 +117,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "beard",
+                name: "Beard",
                 item_type: "cosmetic",
                 description: "A playful beard that makes the egg look wise and patient.",
                 price: 120,
@@ -137,7 +127,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "dirty_boots",
+                name: "Dirty Boots",
                 item_type: "cosmetic",
                 description: "Muddy little boots for an egg that has been out gathering memories.",
                 price: 130,
@@ -147,7 +137,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "flower_crown",
+                name: "Flower Crown",
                 item_type: "cosmetic",
                 description: "A crown of small flowers that adds a fresh and affectionate touch.",
                 price: 160,
@@ -157,7 +147,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "glasses",
+                name: "Glasses",
                 item_type: "cosmetic",
                 description: "Round glasses that give the egg a thoughtful, curious look.",
                 price: 140,
@@ -167,7 +157,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "life_buoy",
+                name: "Life Buoy",
                 item_type: "cosmetic",
                 description: "A bright life buoy that helps the egg feel safe and supported.",
                 price: 150,
@@ -177,7 +167,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "on_fire",
+                name: "On Fire",
                 item_type: "cosmetic",
                 description: "A lively flame effect for an egg filled with intense energy.",
                 price: 210,
@@ -187,7 +177,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "spinning_hat",
+                name: "Spinning Hat",
                 item_type: "cosmetic",
                 description: "A spinning hat that adds motion and a cheerful spark to the egg.",
                 price: 190,
@@ -197,7 +187,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "top_hat",
+                name: "Top Hat",
                 item_type: "cosmetic",
                 description: "A neat top hat that gives the egg a polished, classic style.",
                 price: 180,
@@ -207,7 +197,7 @@ async function initDb(db) {
                 is_active: 1
             },
             {
-                name: "work_overall",
+                name: "Work Overall",
                 item_type: "cosmetic",
                 description: "Sturdy work overalls for an egg ready to build new memories.",
                 price: 170,
