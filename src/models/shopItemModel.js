@@ -103,7 +103,7 @@ async function initDb(db) {
                 price: 170,
                 effect_type: "warmth",
                 effect_value: "6",
-                asset_url: "/assets/music/src_assets_mi-querido.m4a",
+                asset_url: "/assets/music/mi-querido.m4a",
                 is_active: 1
             },
             {
@@ -113,7 +113,7 @@ async function initDb(db) {
                 price: 220,
                 effect_type: "glow",
                 effect_value: "10",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/Angelic.png",
                 is_active: 1
             },
             {
@@ -123,7 +123,7 @@ async function initDb(db) {
                 price: 120,
                 effect_type: "weight",
                 effect_value: "4",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/Beard.png",
                 is_active: 1
             },
             {
@@ -133,7 +133,7 @@ async function initDb(db) {
                 price: 130,
                 effect_type: "weight",
                 effect_value: "5",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/DirtyBoots.png",
                 is_active: 1
             },
             {
@@ -143,7 +143,7 @@ async function initDb(db) {
                 price: 160,
                 effect_type: "warmth",
                 effect_value: "7",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/FlowerCrown.png",
                 is_active: 1
             },
             {
@@ -153,7 +153,7 @@ async function initDb(db) {
                 price: 140,
                 effect_type: "glow",
                 effect_value: "4",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/Glasses.png",
                 is_active: 1
             },
             {
@@ -163,7 +163,7 @@ async function initDb(db) {
                 price: 150,
                 effect_type: "warmth",
                 effect_value: "5",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/LifeBuoy.png",
                 is_active: 1
             },
             {
@@ -173,7 +173,7 @@ async function initDb(db) {
                 price: 210,
                 effect_type: "glow",
                 effect_value: "12",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/OnFire.png",
                 is_active: 1
             },
             {
@@ -183,7 +183,7 @@ async function initDb(db) {
                 price: 190,
                 effect_type: "glow",
                 effect_value: "8",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/SpinningHat.png",
                 is_active: 1
             },
             {
@@ -193,7 +193,7 @@ async function initDb(db) {
                 price: 180,
                 effect_type: "weight",
                 effect_value: "3",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/TopHat.png",
                 is_active: 1
             },
             {
@@ -203,9 +203,69 @@ async function initDb(db) {
                 price: 170,
                 effect_type: "weight",
                 effect_value: "6",
-                asset_url: null,
+                asset_url: "/assets/cosmetics/Wearables/WorkOverall.png",
                 is_active: 1
-            }
+            },
+            // {
+            //     name: "Concrete Slab",
+            //     item_type: "cosmetic",
+            //     description: "A sturdy concrete slab seat for an egg with a grounded mood.",
+            //     price: 130,
+            //     effect_type: "weight",
+            //     effect_value: "7",
+            //     asset_url: "/assets/cosmetics/Sitting/ConcreteSlab.png",
+            //     is_active: 1
+            // },
+            // {
+            //     name: "Cushion",
+            //     item_type: "cosmetic",
+            //     description: "A soft cushion that gives the egg a warm and comfortable place to rest.",
+            //     price: 150,
+            //     effect_type: "warmth",
+            //     effect_value: "6",
+            //     asset_url: "/assets/cosmetics/Sitting/Cushion.png",
+            //     is_active: 1
+            // },
+            // {
+            //     name: "Flower Seat",
+            //     item_type: "cosmetic",
+            //     description: "A blooming flower seat that adds a gentle natural touch.",
+            //     price: 160,
+            //     effect_type: "warmth",
+            //     effect_value: "7",
+            //     asset_url: "/assets/cosmetics/Sitting/Flower.png",
+            //     is_active: 1
+            // },
+            // {
+            //     name: "Green Slime",
+            //     item_type: "cosmetic",
+            //     description: "A bouncy green slime seat with a playful glow.",
+            //     price: 170,
+            //     effect_type: "glow",
+            //     effect_value: "6",
+            //     asset_url: "/assets/cosmetics/Sitting/GreenSlime.png",
+            //     is_active: 1
+            // },
+            // {
+            //     name: "Pink Slime",
+            //     item_type: "cosmetic",
+            //     description: "A cheerful pink slime seat that makes the egg feel lively.",
+            //     price: 170,
+            //     effect_type: "warmth",
+            //     effect_value: "6",
+            //     asset_url: "/assets/cosmetics/Sitting/PinkSlime.png",
+            //     is_active: 1
+            // },
+            // {
+            //     name: "Waterlily",
+            //     item_type: "cosmetic",
+            //     description: "A calm waterlily seat that gives the egg a peaceful glow.",
+            //     price: 180,
+            //     effect_type: "glow",
+            //     effect_value: "7",
+            //     asset_url: "/assets/cosmetics/Sitting/Waterlily.png",
+            //     is_active: 1
+            // }
         ];
 
         for (const item of shopItemMockData) {
