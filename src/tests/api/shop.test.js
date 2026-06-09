@@ -4,6 +4,12 @@ const request = require("supertest");
 
 jest.mock("../../models/shopItemModel");
 jest.mock("../../services/shopService");
+jest.mock("../../middleware/authMiddleware", () => ({
+  authenticate: (req, res, next) => {
+    req.user = { user_id: 1 };
+    next();
+  }
+}));
 
 const app = require("../../app");
 const shopItemModel = require("../../models/shopItemModel");
@@ -32,7 +38,7 @@ describe("GET /api/shop/items", () => {
       .query({ item_type: "music", only_active: "1" });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(items);
+    expect(response.body).toEqual({ items });
     expect(shopItemModel.getAll).toHaveBeenCalledWith("1", "music");
   });
 });
@@ -53,7 +59,7 @@ describe("POST /api/shop/:id/purchase", () => {
     shopService.purchaseItem.mockResolvedValue(purchaseResult);
 
     const response = await request(app)
-      .post("/api/shop/1/purchase")
+      .post("/api/shop/purchase")
       .send({ item_id: "101" });
 
     expect(response.status).toBe(201);

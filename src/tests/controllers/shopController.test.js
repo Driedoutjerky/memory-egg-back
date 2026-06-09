@@ -38,7 +38,7 @@ describe("shopController.getAll", () => {
 
     expect(shopItemModel.getAll).toHaveBeenCalledWith(1, "all");
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(items);
+    expect(res.json).toHaveBeenCalledWith({ items });
   });
 });
 
@@ -50,7 +50,7 @@ describe("shopController.purchase", () => {
   test("returns 400 when item_id is missing", async () => {
     // Keep one request-body validation test at the controller layer.
     const req = {
-      params: { id: "1" },
+      user: { user_id: 1 },
       body: {}
     };
     const res = mockResponse();
@@ -74,7 +74,7 @@ describe("shopController.purchase", () => {
     };
     shopService.purchaseItem.mockResolvedValue(purchaseResult);
     const req = {
-      params: { id: "1" },
+      user: { user_id: 1 },
       body: { item_id: "101" }
     };
     const res = mockResponse();

@@ -28,7 +28,10 @@ describe("eggController.findById", () => {
       active_background_id: null
     };
     eggModel.findById.mockResolvedValue(egg);
-    const req = { params: { id: "1" } };
+    const req = {
+      user: { user_id: 1 },
+      params: { id: "1" }
+    };
     const res = mockResponse();
 
     await eggController.findById(req, res);
@@ -47,7 +50,7 @@ describe("eggController.equip", () => {
   test("returns 400 when user_id is invalid", async () => {
     // Keep validation here because this is controller-owned behavior.
     const req = {
-      params: { id: "abc" },
+      user: { user_id: 0 },
       body: { item_id: 1 }
     };
     const res = mockResponse();
@@ -70,7 +73,7 @@ describe("eggController.equip", () => {
     };
     eggService.equip.mockResolvedValue(egg);
     const req = {
-      params: { id: "1" },
+      user: { user_id: 1 },
       body: { item_id: 10 }
     };
     const res = mockResponse();

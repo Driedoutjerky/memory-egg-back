@@ -51,6 +51,11 @@ describe("shopService.purchaseItem", () => {
     userModel.findById.mockResolvedValue(user);
     userModel.decreaseWillIfEnough.mockResolvedValue(true);
     userItemModel.create.mockResolvedValue(true);
+    userItemModel.findByIds.mockResolvedValue({
+      user_id: user.user_id,
+      item_id: item.item_id,
+      quantity: 1
+    });
 
     const result = await shopService.purchaseItem({
       user_id: user.user_id,
@@ -70,7 +75,14 @@ describe("shopService.purchaseItem", () => {
       })
     );
     expect(db.run).toHaveBeenNthCalledWith(2, "COMMIT");
-    expect(result.item_id).toBe(item.item_id);
+    expect(result.item).toEqual(item);
+    expect(result.userItems).toEqual(
+      expect.objectContaining({
+        user_id: user.user_id,
+        item_id: item.item_id
+      })
+    );
+    expect(result.willBalance).toBe(user.will_balance);
   });
 
   test("rolls back when the user does not have enough will balance", async () => {

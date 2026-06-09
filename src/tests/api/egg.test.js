@@ -3,6 +3,12 @@
 const request = require("supertest");
 
 jest.mock("../../services/eggService");
+jest.mock("../../middleware/authMiddleware", () => ({
+  authenticate: (req, res, next) => {
+    req.user = { user_id: 1 };
+    next();
+  }
+}));
 
 const app = require("../../app");
 const eggService = require("../../services/eggService");
@@ -15,7 +21,7 @@ describe("PATCH /api/egg/:id/equip", () => {
   test("returns 400 when item_id is invalid", async () => {
     // Keep one validation test at the API layer so malformed request handling is covered.
     const response = await request(app)
-      .patch("/api/egg/1/equip")
+      .patch("/api/egg/equip")
       .send({ item_id: "invalid" });
 
     expect(response.status).toBe(400);
@@ -37,7 +43,7 @@ describe("PATCH /api/egg/:id/equip", () => {
     eggService.equip.mockResolvedValue(egg);
 
     const response = await request(app)
-      .patch("/api/egg/1/equip")
+      .patch("/api/egg/equip")
       .send({ item_id: 101 });
 
     expect(response.status).toBe(200);
