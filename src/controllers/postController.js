@@ -7,7 +7,7 @@ async function getAll(req, res){
         const user_id = Number(req.user.user_id);
         const posts = await postModel.getAll(user_id);
         //if(!posts || posts.length === 0) return res.status(404).json("no Posts found");
-        res.status(200).json(posts);
+        res.status(200).json({"posts": posts});
     } catch (err){
         console.error(err);
         res.status(err.statusCode || 500).json({error: err.message});
@@ -20,7 +20,7 @@ async function getById(req, res){
         const post_id = Number(req.params.id);
         const post = await postModel.findById(post_id, user_id);
         //if(!post) return res.status(404).json({error: "Post not found"});
-        return res.status(200).json(post);
+        return res.status(200).json({ "post": post});
     } catch (err) {
         console.error(err);
         res.status(err.statusCode || 500).json({error: err.message});
@@ -33,8 +33,8 @@ async function getById(req, res){
 // req.body would be undefined.
 async function create(req, res) {
   try {
-    const { user_id, title, content, image_url, tag, visibility, word_count,
-       will_reward, created_at, updated_at } = req.body;
+    const user_id = req.user.user_id;
+    const {title, content, image_url, tag, visibility, will_reward} = req.body;
     // Basic validation: required fields must be present.
     // Without this, an INSERT with NULL would fail at the database level
     // because of the NOT NULL constraints we defined in db.js.
@@ -43,17 +43,14 @@ async function create(req, res) {
     !title ||
     !content ||
     !tag ||
-    !visibility ||
-    //word_count === undefined ||
-    // will_reward === undefined ||
-    created_at == null ||
-    updated_at == null
+    !visibility
     ) {
     return res.status(400).json({ error: "Missing required fields" });
     }
     const countTheWords = (str) => {return str.trim() .split(/\s+/).length;}
     const wordCount = countTheWords(content);
-
+    const created_at = new Date().toISOString().split("T")[0];
+    const updated_at = new Date().toISOString().split("T")[0];
     const calculatedWillReward = Math.round(wordCount / 10);
 
     // TRANSACTION shizzle implementieren !! -> implement postService.js !! 
@@ -61,7 +58,7 @@ async function create(req, res) {
     
     userModel.increaseWillAfterPost(calculatedWillReward, user_id); 
     
-    res.status(201).json(newPost);
+    res.status(201).json({"post" : newPost});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Database error" });

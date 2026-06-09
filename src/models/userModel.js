@@ -91,10 +91,6 @@ async function initDb(db) {
   return db;
 }
 
-function getDb() {
-  return usersDb;
-}
-
 async function findById(user_id) {
     return await usersDb.get("SELECT * FROM users WHERE user_id = ?", [user_id]);
 }
@@ -174,7 +170,7 @@ async function decreaseWillIfEnough(user_id, price) {
 
 async function increaseWillAfterPost(calculatedWillReward, user_id){
   
-  const result = await getDb().run(
+  const result = await usersDb.run(
   `UPDATE users SET will_balance = will_balance + ? WHERE user_id = ?`,
   [calculatedWillReward, user_id]);
   }

@@ -39,16 +39,18 @@ async function equip({ user_id, item_id }) {
     // if there is an item which is already equipped, unequip
     if (prior != null && prior != item_id) {
         let priorInventory = await userItemModel.findByIds(user_id, prior);
-
+        let priorItem = await shopItemModel.findById(prior);
         if (priorInventory) {
             priorInventory.is_equipped = 0;
             await userItemModel.update(priorInventory);
         }
+        applyItemEffect(egg, priorItem, 0);
     }
-    if (prior != item_id){
-        applyItemEffect(egg, await shopItemModel.findById(prior), 0);
+    
+    if(prior != item_id){
         applyItemEffect(egg, item, 1);
     }
+
     egg[`active_${itemType}_id`] = itemInventory.item_id;
     itemInventory.is_equipped = 1;
     // equip item
@@ -65,7 +67,6 @@ async function equip({ user_id, item_id }) {
     }
 
 }
-
 
 async function unequip({ user_id, item_id }) {
     let egg = await eggModel.findById(user_id);

@@ -324,6 +324,14 @@ components:
           type: integer
           example: 3
 
+    QuestClaimRequest:
+      type: object
+      required: [post_id]
+      properties:
+        post_id:
+          type: integer
+          example: 3
+
     CreatePostRequest:
       type: object
       required: [title, content, tag, visibility]
@@ -438,7 +446,7 @@ components:
       properties:
         userQuest:
           $ref: '#/components/schemas/UserQuest'
-        willBalance:
+        will_balance_of_user:
           type: integer
           example: 130
 
@@ -472,10 +480,12 @@ components:
     InventoryResponse:
       type: object
       properties:
+        userItems:
+          type: array
+          $ref: '#/components/schemas/UserItem'
         items:
           type: array
-          items:
-            $ref: '#/components/schemas/InventoryItem'
+          $ref: '#/components/schemas/ShopItem'
 
 paths:
   # 0. SYSTEM CHECK
@@ -782,6 +792,12 @@ paths:
     post:
       summary: Claim completed quest reward
       tags: [Quest]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestClaimRequest'
       security:
         - bearerAuth: []
       parameters:
