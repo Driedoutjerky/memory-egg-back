@@ -15,6 +15,6 @@ const {authenticate} = require("../middleware/authMiddleware");
 // was mounted in app.js: `app.use("/api/quests", questRouter);`
 
 router.get("/today", authenticate, controller.getTodaysQuests);
-router.post("/:id/claim", authenticate, controller.claimCompletedQuestReward);
+router.post("/:id/claim", authenticate, controller.claimCompletedQuestReward); //id means userQuestId
 
 module.exports = router;
