@@ -181,6 +181,7 @@ Deployed documentation:
 | GET    | `/api/auth/me`           | Get current user profile, egg, and equipped items | Yes           |
 | GET    | `/api/auth/me/inventory` | View owned items                                  | Yes           |
 | PATCH  | `/api/egg/equip`         | Equip background, music, or cosmetic item         | Yes           |
+| PATCH  | `/api/egg/unequip`         | Unequip background, music, or cosmetic item     | Yes           |
 | POST   | `/api/posts`             | Create notebook post                              | Yes           |
 | GET    | `/api/posts/all`         | Get all posts created by current user             | Yes           |
 | GET    | `/api/posts/:id`         | Get one post                                      | Yes           |

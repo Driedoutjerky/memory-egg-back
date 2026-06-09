@@ -609,6 +609,7 @@ paths:
 
   # 2. EGG
   # - PATCH /api/egg/equip
+  # - PATCH /api/egg/unequip
   /api/egg/equip:
     patch:
       summary: Equip background, music, or cosmetic item to egg
@@ -630,6 +631,43 @@ paths:
                 $ref: '#/components/schemas/EquipEggResponse'
         "400":
           description: Invalid item for equip action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Item not found or not owned by user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/egg/unequip:
+    patch:
+      summary: Unquip background, music, or cosmetic item to egg
+      tags: [Egg]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipEggRequest'
+      responses:
+        "200":
+          description: Item unequipped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipEggResponse'
+        "400":
+          description: Invalid item for unequip action
           content:
             application/json:
               schema:
