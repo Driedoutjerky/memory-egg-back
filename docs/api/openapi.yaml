@@ -9,8 +9,8 @@ info:
     obtained from POST /api/auth/login. User-related endpoints are grouped under /api/auth to ensure auth.
 
 servers:
-  - url: http://localhost:5000
-
+  - url: /
+    description: Current server
 tags:
   - name: System Check
     description: Optional backend health check endpoint.
