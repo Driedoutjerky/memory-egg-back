@@ -171,18 +171,18 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
     }
 
     // 1. is this quest in the current user's quest?
-    let questIfCurrentUser = await getDb().get(
+    let userQuest = await getDb().get(
         "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
     );
 
     
-    if (!questIfCurrentUser){
-        const error = new Error("Forbidden! Quest " + user_quest_id + "does not belong to the user with user_id: " + user_id);
+    if (!userQuest){
+        const error = new Error("Forbidden! Quest " + user_quest_id + "does not belong to the currently logged in user");
         error.statusCode = 403;
         throw error;
     }
 
-    if (questIfCurrentUser.status === "claimed") {
+    if (userQuest.status === "claimed") {
     const error = new Error(
         `Quest ${user_quest_id} has already been claimed`
     );
@@ -192,7 +192,7 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
 
     // 1b) are quest completition conditions met ? 
     const quest_template_Object = await getDb().get(
-        "SELECT * FROM quests WHERE quest_id = ?", [questIfCurrentUser.quest_id]
+        "SELECT * FROM quests WHERE quest_id = ?", [userQuest.quest_id]
     )
     const quest_type = quest_template_Object.quest_type;
     const required_tag = quest_template_Object.required_tag;
@@ -201,7 +201,7 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
     
     //load the posts:
     const tag_type_post = await getDb().get(
-        //"SELECT * FROM posts WHERE post_id = ?", [questIfCurrentUser.completed_post_id]
+        //"SELECT * FROM posts WHERE post_id = ?", [userQuest.completed_post_id]
         "SELECT * FROM posts WHERE user_id = ? AND tag LIKE ? AND post_id NOT IN (SELECT completed_post_id FROM user_quests WHERE completed_post_id IS NOT NULL)",
         [user_id, required_tag]
     )
@@ -356,10 +356,10 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
 
 //     // 2. is it actually done? & Is it already claimed?
 //         //Update Variable:
-//     questIfCurrentUser = await getDb().get(
+//     userQuest = await getDb().get(
 //         "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
 //     );
-//     const status = questIfCurrentUser.status;
+//     const status = userQuest.status;
 
 //     // 3. load will_balance_of_user from user table
 //     if (status !== "completed"){
@@ -382,15 +382,15 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
     await getDb().run("UPDATE users SET will_balance = ? WHERE user_id = ?", [will_balance_of_user, user_id]);
 
     // 5. Update User Quest with is_completed as true
-    await getDb().run("UPDATE user_quests SET status = 'claimed', completed_at = ? WHERE user_quest_id = ?", [new Date().toISOString(), user_quest_id]);
+    await getDb().run("UPDATE user_quests SET status = 'claimed', completed_at = ? WHERE user_quest_id = ?", [new Date().toISOString().split('T')[0], user_quest_id]);
     
     //Update Variable:
-    questIfCurrentUser = await getDb().get(
+    userQuest = await getDb().get(
     "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
     );
 
     // return Completed Quest Info and will_balance
-    return {questIfCurrentUser : questIfCurrentUser, will_balance_of_user : will_balance_of_user}
+    return {userQuest : userQuest, will_balance_of_user : will_balance_of_user}
 }
 
 
