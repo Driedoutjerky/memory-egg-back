@@ -217,18 +217,6 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
         [user_id]
     )
     console.log(image_required_type_post)
-
-    // if(tag_type_post === undefined && word_count_type_post === undefined && image_required_type_post === undefined){
-    //     const error = new Error(`no corresponding post for quest ${user_quest_id} found`);
-    //     error.statusCode = 404;
-    //     throw error;
-    // }
-
-    // if(quest_type === "post_tag" && required_tag !== tag_type_post.tag){
-        //     const error = new Error(`wrong tag for userQuest ${user_quest_id}`);
-        //     error.statusCode = 400;
-        //     throw error;
-        // }
     
     // completion conditions NOT met ?    
     if (quest_type === "post_tag") {
@@ -342,31 +330,6 @@ async function increaseWillAfterQuest(user_quest_id, user_id, getAllPostsOfUser)
         
 
     }
-
-//     // 1c) update "user_quests" as completed, set completed_post_id and completed_at
-//     await getDb().run(
-//         // completed_post_id = ?,
-//   `UPDATE user_quests
-//    SET status = 'completed',
-//        completed_at = ?
-//    WHERE user_quest_id = ?
-//     AND status = 'assigned'`,
-//   [new Date().toISOString(), user_quest_id]
-// );
-
-//     // 2. is it actually done? & Is it already claimed?
-//         //Update Variable:
-//     userQuest = await getDb().get(
-//         "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
-//     );
-//     const status = userQuest.status;
-
-//     // 3. load will_balance_of_user from user table
-//     if (status !== "completed"){
-//         const error = new Error("Quest status is not 'completed'");
-//         error.statusCode = 403;
-//         throw error;
-//     }
 
     const will_balance_of_user_Object = await getDb().get("SELECT will_balance FROM users WHERE user_id = ?", [user_id]);
     let will_balance_of_user = will_balance_of_user_Object.will_balance;
