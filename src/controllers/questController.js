@@ -1,8 +1,9 @@
 
 const questModel = require("../models/questModel");
 const userQuestModel = require("../models/userQuestModel");
+const postModel = require("../models/postModel");
 
-
+/*
 async function getTodaysQuests (req, res){
     try{
         // the req.user.user_id is provided by authenticate() from authMiddleware.js
@@ -40,13 +41,36 @@ async function getTodaysQuests (req, res){
         res.status(500).json({error: "Database error"});
     }
 }
+*/
 
+async function getTodaysQuests(req, res) {
+  try {
+    const user_id = Number(req.user.user_id);
+    const today = new Date().toISOString().split("T")[0];
+    await userQuestModel.assignTodaysQuestsIfMissing(user_id);
+    const todaysQuests = await userQuestModel.getTodaysQuests(today, user_id);
+
+    return res.status(200).json(todaysQuests);
+  } catch (err) {
+    console.error(err);
+    return res.status(err.statusCode || 500).json({ error: err.message });
+  }
+}
+
+// quest-refactor: Pass only one post, not all the posts.
 async function claimCompletedQuestReward(req, res){
     try{
         const user_id = Number(req.user.user_id);
         const user_quest_id = Number(req.params.id);
-        if(!user_quest_id) {res.status(400).json("Missing valid path parameter for 'user_quest_id'")};
-        const outcomeOfClaimedQuestReward = await userQuestModel.increaseWillAfterQuest(user_quest_id, user_id);
+        const post_id = Number(req.body.post_id);
+
+        if(!user_quest_id) {return res.status(400).json("Missing valid path parameter for 'user_quest_id'")};
+        if(!post_id) {return res.status(400).json("Missing required body field: 'post_id'")};
+
+        //const getAllPostsOfUser = await postModel.getAll(user_id);
+        const post = await postModel.findById(post_id, user_id);
+
+        const outcomeOfClaimedQuestReward = await userQuestModel.increaseWillAfterQuest(user_quest_id, user_id, post);
 
         res.status(201).json(outcomeOfClaimedQuestReward);
 

@@ -96,7 +96,23 @@ async function initDb(db) {
                 user_id: 4,
                 quest_id: 2,
                 assigned_date: now,
-                status: "completed",
+                status: "assigned",
+                completed_post_id: null,
+                completed_at: null
+            },
+            {
+                user_id: 4,
+                quest_id: 3,
+                assigned_date: now,
+                status: "assigned",
+                completed_post_id: null,
+                completed_at: null
+            },
+            {
+                user_id: 4,
+                quest_id: 4,
+                assigned_date: now,
+                status: "assigned",
                 completed_post_id: null,
                 completed_at: null
             }
@@ -132,69 +148,272 @@ async function initDb(db) {
 function getDb() {
     return userQuestsDb;
 }
-
-async function getIdOfTodaysQuests(date, userId) {
+/*
+async function getIdOfTodaysQuests(date, user_id) {
     const result = await getDb().all(
         "SELECT quest_id FROM user_quests WHERE assigned_date = ? AND user_id = ?",
-        [date, userId]
+        [date, user_id]
     );
     return result;
 }
+*/
 
-async function increaseWillAfterQuest(user_quest_id, user_id){
+// quest-refactor: It should return joined quest + user quest data.
+// Frontend needs user_quest_id, status, completed_post_id
+
+async function getTodaysQuests(date, user_id) {
+  const result = await getDb().all(
+    `
+    SELECT
+      uq.user_quest_id,
+      uq.user_id,
+      uq.quest_id,
+      uq.assigned_date,
+      uq.status,
+      uq.completed_post_id,
+      uq.completed_at,
+
+      q.title,
+      q.description,
+      q.quest_type,
+      q.required_tag,
+      q.required_word_count,
+      q.required_image,
+      q.reward_will,
+      q.is_active
+    FROM user_quests uq
+    INNER JOIN quests q
+      ON uq.quest_id = q.quest_id
+    WHERE uq.assigned_date = ?
+      AND uq.user_id = ?
+      AND q.is_active = 1
+    `,
+    [date, user_id]
+  );
+
+  return result;
+}
+
+// New user doesn't get quest assigned. This function fixes the relevant issue.
+async function assignTodaysQuestsIfMissing(user_id) {
+  const today = new Date().toISOString().split("T")[0];
+
+  const existing = await getDb().all(
+    `
+    SELECT user_quest_id
+    FROM user_quests
+    WHERE user_id = ?
+      AND assigned_date = ?
+    `,
+    [user_id, today]
+  );
+
+  if (existing.length > 0) {
+    return;
+  }
+
+  const activeQuests = await getDb().all(
+    `
+    SELECT quest_id
+    FROM quests
+    WHERE is_active = 1
+    LIMIT 3
+    `
+  );
+
+  for (const quest of activeQuests) {
+    await getDb().run(
+      `
+      INSERT OR IGNORE INTO user_quests (
+        user_id,
+        quest_id,
+        assigned_date,
+        status,
+        completed_post_id,
+        completed_at
+      )
+      VALUES (?, ?, ?, 'assigned', NULL, NULL)
+      `,
+      [user_id, quest.quest_id, today]
+    );
+  }
+}
+
+
+// Helper function for quest completion condition check. Used in `increaseWillAfterQuest()`
+function doesPostSatisfyQuest(post, quest) {
+  const questType = quest.quest_type;
+
+  if (questType === "post_tag") {
+    return post.tag === quest.required_tag;
+  }
+
+  if (questType === "word_count") {
+    return Number(post.word_count) >= Number(quest.required_word_count);
+  }
+
+  if (questType === "image") {
+    return Boolean(post.image_url);
+  }
+
+  if (questType === "post_tag_image") {
+    return post.tag === quest.required_tag && Boolean(post.image_url);
+  }
+
+  if (questType === "post_tag_word_count") {
+    return (
+      post.tag === quest.required_tag &&
+      Number(post.word_count) >= Number(quest.required_word_count)
+    );
+  }
+
+  return false;
+}
+
+
+async function increaseWillAfterQuest(user_quest_id, user_id, post){
   
-    const doesQuestExist = await getDb().get(
-        "SELECT * FROM user_quests WHERE user_quest_id = ?", [user_quest_id]
+    const userQuest = await getDb().get(
+        `
+        SELECT
+        uq.*,
+        q.title,
+        q.description,
+        q.quest_type,
+        q.required_tag,
+        q.required_word_count,
+        q.required_image,
+        q.reward_will,
+        q.is_active
+        FROM user_quests uq
+        INNER JOIN quests q
+        ON uq.quest_id = q.quest_id
+        WHERE uq.user_quest_id = ?
+        `,
+        [user_quest_id]
     );
 
-    if(!doesQuestExist){
+    // 1. is this quest in the current user's quest?
+    
+    if (!userQuest){
         const error = new Error("Quest not found");
         error.statusCode = 404;
         throw error;
-        
     }
 
-    // 1. is this quest in the current user's quest?
-    const questIfCurrentUser = await getDb().get(
-        "SELECT * FROM user_quests WHERE user_quest_id = ? AND user_id = ?", [user_quest_id, user_id]
+    if (Number(userQuest.user_id) !== Number(user_id)) {
+        const error = new Error(
+        `Forbidden! Quest ${user_quest_id} does not belong to the currently logged in user`
+        );
+        error.statusCode = 403;
+        throw error;
+    }
+
+    if (userQuest.status === "claimed") {
+        const error = new Error(
+            `Quest ${user_quest_id} has already been claimed`
+        );
+        error.statusCode = 409;
+        throw error;
+    }
+
+    // 2. is this quest already completed?
+    const alreadyUsedPost = await getDb().get(
+        `
+        SELECT user_quest_id
+        FROM user_quests
+        WHERE completed_post_id = ?
+        AND status = 'claimed'
+        `,
+        [post.post_id]
     );
 
-    if (!questIfCurrentUser){
-        const error = new Error("Forbidden! Quest does not belong to the user with user_id: " + user_id);
-        error.statusCode = 403;
+    if (alreadyUsedPost) {
+        const error = new Error(
+        `Post ${post.post_id} has already been used to claim another quest`
+        );
+        error.statusCode = 409;
         throw error;
     }
 
-    // 2. is it actually done? & Is it already claimed?
-    const status = questIfCurrentUser.status;
+    // 3. are quest completion conditions met?
 
-    // 3. load will_balance_of_user from user table
-    if (status !== "completed"){
-        const error = new Error("Quest status is not 'completed'");
-        error.statusCode = 403;
+    const isSatisfied = doesPostSatisfyQuest(post, userQuest);
+
+    if (!isSatisfied) {
+        const error = new Error(
+        `Post ${post.post_id} does not satisfy quest ${user_quest_id}`
+        );
+        error.statusCode = 400;
         throw error;
     }
 
-    const will_balance_of_user_Object = await getDb().get("SELECT will_balance FROM users WHERE user_id = ?", [user_id]);
-    let will_balance_of_user = will_balance_of_user_Object.will_balance;
-    
 
-    const reward_will_Object = await getDb().get("SELECT reward_will FROM quests INNER JOIN user_quests ON quests.quest_id = user_quests.quest_id;");
-    const reward_will = reward_will_Object.reward_will;
-    
     // 4. increase will_balance_of_user by its will_reward
-    will_balance_of_user += reward_will;
-    
-    
-    await getDb().run("UPDATE users SET will_balance = ? WHERE user_id = ?", [will_balance_of_user, user_id]);
+    const rewardWill = Number(userQuest.reward_will);
+
+    await getDb().run(
+        `
+        UPDATE users
+        SET will_balance = will_balance + ?
+        WHERE user_id = ?
+        `,
+        [rewardWill, user_id]
+    );
 
     // 5. Update User Quest with is_completed as true
-    await getDb().run("UPDATE user_quests SET status = 'claimed' WHERE user_quest_id = ?", [user_quest_id]);
+
+    await getDb().run(
+        `
+        UPDATE user_quests
+        SET status = 'claimed',
+            completed_post_id = ?,
+            completed_at = ?
+        WHERE user_quest_id = ?
+        AND user_id = ?
+        `,
+        [
+        post.post_id,
+        new Date().toISOString().split("T")[0],
+        user_quest_id,
+        user_id
+        ]
+    );
+
+    const updatedUserQuest = await getDb().get(
+        `
+        SELECT
+        uq.*,
+        q.title,
+        q.description,
+        q.quest_type,
+        q.required_tag,
+        q.required_word_count,
+        q.required_image,
+        q.reward_will,
+        q.is_active
+        FROM user_quests uq
+        INNER JOIN quests q
+        ON uq.quest_id = q.quest_id
+        WHERE uq.user_quest_id = ?
+        AND uq.user_id = ?
+        `,
+        [user_quest_id, user_id]
+    );
+
+    const updatedUser = await getDb().get(
+        "SELECT user_id, nickname, will_balance FROM users WHERE user_id = ?",
+        [user_id]
+    );
 
     // return Completed Quest Info and will_balance
-    return {questIfCurrentUser : questIfCurrentUser, will_balance_of_user : will_balance_of_user}
+    return {
+        userQuest: updatedUserQuest,
+        user: updatedUser,
+        reward_will: rewardWill,
+    };
 }
 
 
 
-module.exports = { initDb, getIdOfTodaysQuests, increaseWillAfterQuest};
+module.exports = { initDb, getTodaysQuests, assignTodaysQuestsIfMissing, increaseWillAfterQuest};
