@@ -34,7 +34,7 @@ async function initDb(db) {
     effect_type TEXT CHECK (
       effect_type IS NULL OR effect_type IN ('glow', 'warmth', 'weight')
     ),
-    effect_value TEXT,
+    effect_value INTEGER,
     asset_url TEXT,
     is_active INTEGER NOT NULL DEFAULT 1 CHECK (
       is_active IN (0, 1)
