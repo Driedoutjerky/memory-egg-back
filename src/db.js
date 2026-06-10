@@ -24,7 +24,7 @@ let db;
 
 async function initDb() {
   db = await open({
-    filename: "./database.sqlite",
+    filename: "./src/data/database.sqlite",
     driver: sqlite3.Database
   });
 
