@@ -32,7 +32,7 @@ async function initDb(db) {
       completed_post_id	INTEGER,
       completed_at STRING,
 
-      UNIQUE(user_id, quest_id),
+      UNIQUE(user_id, quest_id, assigned_date),
       FOREIGN KEY (quest_id) REFERENCES quests(quest_id),
       FOREIGN KEY (user_id)
       REFERENCES users(user_id)
